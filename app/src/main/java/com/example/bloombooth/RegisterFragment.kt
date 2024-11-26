@@ -6,10 +6,9 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.bloombooth.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
@@ -46,47 +45,82 @@ class RegisterFragment : Fragment() {
 
         binding.emailVerificationBtn.setOnClickListener {
             val email = binding.emailInput.text.toString()
-            if (email.isNotEmpty()) {
+            if (isEmailValid(email)) {
                 checkEmailAvailability(email)
-            } else {
+            } else if (email.isEmpty()) {
                 Toast.makeText(requireContext(), "이메일을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "유효하지 않은 이메일 형식입니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.emailInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                val email = s.toString()
-                if (email.isNotEmpty()) {
-                    binding.emailVerificationBtn.isEnabled = true
-                    binding.emailVerificationBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.pink))
-                    binding.emailVerificationBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-                    binding.emailVerificationBtn.text = "중복 확인"
-                } else {
-                    binding.emailVerificationBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
-                    binding.emailVerificationBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-                    binding.emailVerificationBtn.text = "중복 확인"
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.emailVerificationBtn.apply {
+                    text = "중복 확인"
+                    isEnabled = true
+                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
                 }
             }
+            override fun afterTextChanged(s: Editable?) {}
         })
 
         binding.pwInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
             override fun afterTextChanged(s: Editable?) {
                 val password = s.toString()
-                if (isPasswordValid(password)) {
-                    binding.passwordError.visibility = TextView.GONE
-                    binding.signupBtn.isEnabled = true
+                val confirmPassword = binding.pwCheckInput.text.toString()
+
+                if (confirmPassword.isNotEmpty() && password != confirmPassword) {
+                    binding.passwordCheckError.visibility = View.VISIBLE
                 } else {
-                    binding.passwordError.visibility = TextView.VISIBLE
-                    binding.signupBtn.isEnabled = false
+                    binding.passwordCheckError.visibility = View.GONE
                 }
+
+                if (password.isEmpty()) {
+                    binding.passwordError.visibility = View.GONE
+                } else if (isPasswordValid(password)) {
+                    binding.passwordError.visibility = View.GONE
+                } else {
+                    binding.passwordError.visibility = View.VISIBLE
+                }
+
+                updateSignupButtonState()
+            }
+        })
+
+        binding.pwCheckInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val password = binding.pwInput.text.toString()
+                val confirmPassword = s.toString()
+
+                if (password != confirmPassword) {
+                    binding.passwordCheckError.visibility = View.VISIBLE
+                } else {
+                    binding.passwordCheckError.visibility = View.GONE
+                }
+
+                updateSignupButtonState()
+            }
+        })
+
+        binding.nicknameInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val nickname = s.toString()
+                if (nickname.isEmpty()) {
+                    binding.nicknameError.visibility = View.GONE
+                } else if (isNicknameValid(nickname)) {
+                    binding.nicknameError.visibility = View.GONE
+                } else {
+                    binding.nicknameError.visibility = View.VISIBLE
+                }
+                updateSignupButtonState()
             }
         })
 
@@ -95,13 +129,43 @@ class RegisterFragment : Fragment() {
             val password = binding.pwInput.text.toString()
             val nickname = binding.nicknameInput.text.toString()
 
-            if (email.isNotEmpty() && password.isNotEmpty() && nickname.isNotEmpty()) {
-                createUser(email, password, nickname)
-            } else {
-                Toast.makeText(requireContext(),
-                    "이메일, 비밀번호, 닉네임을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
-            }
+            createUser(email, password, nickname)
         }
+    }
+
+    private fun isEmailValid(email: String): Boolean {
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        return email.matches(emailPattern.toRegex())
+    }
+
+    private fun isPasswordValid(password: String): Boolean {
+        val regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#\$%^&*])[A-Za-z\\d!@#\$%^&*]{6,12}$"
+        return password.matches(regex.toRegex())
+    }
+
+    private fun isNicknameValid(nickname: String): Boolean {
+        val regex = "^[가-힣a-zA-Z]{2,12}$"
+        return nickname.matches(regex.toRegex())
+    }
+
+    private fun updateSignupButtonState() {
+        val email = binding.emailInput.text.toString()
+        val password = binding.pwInput.text.toString()
+        val confirmPassword = binding.pwCheckInput.text.toString()
+        val nickname = binding.nicknameInput.text.toString()
+
+        val isReady = email.isNotEmpty() &&
+                isPasswordValid(password) &&
+                password == confirmPassword &&
+                isNicknameValid(nickname)
+
+        binding.signupBtn.isEnabled = isReady
+        binding.signupBtn.setBackgroundColor(
+            ContextCompat.getColor(
+                requireContext(),
+                if (isReady) R.color.pink else R.color.gray
+            )
+        )
     }
 
     private fun checkEmailAvailability(email: String) {
@@ -110,22 +174,19 @@ class RegisterFragment : Fragment() {
                 if (task.isSuccessful) {
                     val result = task.result
                     if (result?.signInMethods?.isEmpty() == true) {
-                        binding.emailVerificationBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.pink))
-                        binding.emailVerificationBtn.text = "검증 성공!"
-                        binding.emailVerificationBtn.isEnabled = false
+                        binding.emailVerificationBtn.apply {
+                            text = "검증 성공!"
+                            isEnabled = false
+                            setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.pink))
+                        }
                         Toast.makeText(requireContext(), "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), "이미 사용 중인 이메일입니다.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "이메일 중복검사에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "이메일 중복검사에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
-    }
-
-    private fun isPasswordValid(password: String): Boolean {
-        val regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#\$%^&*])[A-Za-z\\d!@#\$%^&*]{6,12}$"
-        return password.matches(regex.toRegex())
     }
 
     private fun createUser(email: String, password: String, nickname: String) {
@@ -145,8 +206,7 @@ class RegisterFragment : Fragment() {
                             }
                     }
                 } else {
-                    Toast.makeText(requireContext(),
-                        "회원가입이 실패했습니다. : ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "회원가입에 실패했습니다: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
