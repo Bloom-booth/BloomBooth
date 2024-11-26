@@ -34,7 +34,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="70dp"
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:layout_gravity="center"
@@ -63,7 +63,6 @@
                 android:text="중복 확인" />
 
         </LinearLayout>
-
 
         <EditText
             android:id="@+id/email_input"
@@ -109,6 +108,31 @@
             android:textColor="@android:color/holo_red_light"
             android:visibility="gone" />
 
+        <TextView
+            android:layout_marginTop="15dp"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="비밀번호를 다시 한 번 입력해주세요."/>
+
+        <EditText
+            android:id="@+id/pw_check_input"
+            android:maxLines="1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textPassword"
+            android:textSize="13sp"
+            android:hint="입력한 비밀번호를 다시 한 번 입력해주세요!"/>
+
+        <TextView
+            android:id="@+id/password_check_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="비밀번호가 다릅니다. 다시 확인하세요."
+            android:textColor="@android:color/holo_red_light"
+            android:visibility="gone" />
+
+
     </LinearLayout>
 
     <LinearLayout
@@ -139,7 +163,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-            android:text="닉네임은 6자 ~ 12자여야 하며, 한글, 영문을 포함할 수 있습니다."
+            android:text="닉네임은 2자 ~ 12자여야 하며, 한글, 영문을 포함할 수 있습니다."
             android:textColor="@color/red"
             android:visibility="gone" />
 
@@ -151,6 +175,7 @@
         android:layout_height="wrap_content">
 
         <Button
+            android:enabled="false"
             android:layout_margin="30dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
