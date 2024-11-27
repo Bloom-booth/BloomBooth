@@ -28,11 +28,4 @@ class AuthActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
     }
-
-    fun navigateToLoginFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(binding.root.id, LoginFragment())
-            .addToBackStack(null)
-            .commit()
-    }
 }
