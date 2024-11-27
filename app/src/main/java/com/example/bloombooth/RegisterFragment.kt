@@ -10,8 +10,10 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.bloombooth.databinding.FragmentRegisterBinding
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 
 class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
@@ -134,7 +136,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun isEmailValid(email: String): Boolean {
-        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
         return email.matches(emailPattern.toRegex())
     }
 
@@ -169,23 +171,24 @@ class RegisterFragment : Fragment() {
     }
 
     private fun checkEmailAvailability(email: String) {
-        auth.fetchSignInMethodsForEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val result = task.result
-                    if (result?.signInMethods?.isEmpty() == true) {
-                        binding.emailVerificationBtn.apply {
-                            text = "검증 성공!"
-                            isEnabled = false
-                            setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.pink))
-                        }
-                        Toast.makeText(requireContext(), "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(requireContext(), "이미 사용 중인 이메일입니다.", Toast.LENGTH_SHORT).show()
+        val db = Firebase.firestore
+        db.collection("user")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    binding.emailVerificationBtn.apply {
+                        text = "검증 성공!"
+                        isEnabled = false
+                        setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.pink))
                     }
+                    Toast.makeText(requireContext(), "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(requireContext(), "이메일 중복검사에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "이미 사용 중인 이메일입니다.", Toast.LENGTH_SHORT).show()
                 }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "이메일 중복 검사에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -195,18 +198,37 @@ class RegisterFragment : Fragment() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     user?.let {
-                        val profileUpdates = userProfileChangeRequest {
-                            displayName = nickname
-                        }
-                        it.updateProfile(profileUpdates)
-                            .addOnCompleteListener { updateTask ->
-                                if (updateTask.isSuccessful) {
-                                    navigateToLoginFragment()
-                                }
+                        val userData = hashMapOf(
+                            "nickname" to nickname,
+                            "email" to email
+                        )
+
+                        val db = FirebaseFirestore.getInstance()
+                        db.collection("user")
+                            .document(it.uid)
+                            .set(userData)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "회원가입이 성공적으로 완료되었습니다:) 해당 계정으로 로그인해주세요!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                navigateToLoginFragment()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(
+                                    requireContext(),
+                                    "데이터 저장 실패: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                     }
                 } else {
-                    Toast.makeText(requireContext(), "회원가입에 실패했습니다: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "회원가입에 실패했습니다: ${task.exception?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
