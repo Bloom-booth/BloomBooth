@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.bloombooth"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.bloombooth"
@@ -35,6 +35,12 @@ android {
         jvmTarget = "1.8"
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -49,9 +55,18 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.runner)
+    implementation(libs.androidx.espresso.intents)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    testImplementation(platform("org.mockito:mockito-core:4.11.0"))
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.fragment.testing)
+    androidTestImplementation(libs.mockito)
 
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     // TODO: Add the dependencies for Firebase products you want to use
