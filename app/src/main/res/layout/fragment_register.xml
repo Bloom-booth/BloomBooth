@@ -156,7 +156,7 @@
             android:layout_height="40dp"
             android:maxLines="1"
             android:textSize="13sp"
-            android:hint="한글 및 영문을 사용하며, 6자 ~ 12자여아 합니다."/>
+            android:hint="한글 및 영문을 사용하며, 2자 ~ 12자여아 합니다."/>
 
         <TextView
             android:id="@+id/nickname_error"
