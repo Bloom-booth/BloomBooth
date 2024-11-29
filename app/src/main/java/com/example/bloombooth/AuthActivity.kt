@@ -1,27 +1,31 @@
 package com.example.bloombooth
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityAuthBinding
-import com.google.firebase.auth.FirebaseAuth
 
 class AuthActivity : AppCompatActivity() {
 
     val binding: ActivityAuthBinding by lazy { ActivityAuthBinding.inflate(layoutInflater) }
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
+        val auth = FirebaseAuthManager.auth
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(binding.root.id, LoginFragment(), LoginFragment::class.java.simpleName)
-                .commit()
+        if (auth.currentUser != null) {
+            navigateToMainActivity()
+        } else {
+            if (savedInstanceState == null) {
+                supportFragmentManager.beginTransaction()
+                    .replace(binding.root.id, LoginFragment(), LoginFragment::class.java.simpleName)
+                    .commit()
+            }
         }
     }
 
@@ -36,8 +40,13 @@ class AuthActivity : AppCompatActivity() {
         val loginFragment = LoginFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, loginFragment)
-            .addToBackStack(null)  // 백스택에 추가하여 뒤로 가기 버튼을 처리할 수 있도록 함
+            .addToBackStack(null)
             .commit()
     }
 
+    private fun navigateToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
 }

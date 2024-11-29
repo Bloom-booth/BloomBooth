@@ -10,16 +10,16 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.FragmentLoginBinding
-import com.google.firebase.auth.FirebaseAuth
 
 class LoginFragment : Fragment() {
 
-    private lateinit var auth: FirebaseAuth
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var loginButton: Button
     private lateinit var signUpText: TextView
+    private val auth = FirebaseAuthManager.auth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +27,6 @@ class LoginFragment : Fragment() {
     ): View? {
         val binding = FragmentLoginBinding.inflate(inflater, container, false)
 
-        auth = FirebaseAuth.getInstance()
         emailEditText = binding.emailInput
         passwordEditText = binding.passwordInput
         loginButton = binding.loginBtn
