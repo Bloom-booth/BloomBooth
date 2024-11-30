@@ -4,9 +4,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MypageActivity"
-    android:orientation="vertical"
-    android:backgroundTint="@color/white">
+    tools:context=".PersonalInfoActivity"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/header"
@@ -40,14 +39,14 @@
 
         <ImageView
             android:id="@+id/home_btn"
-            android:layout_marginLeft="100dp"
+            android:layout_marginLeft="110dp"
             android:backgroundTint="@color/white"
             android:layout_marginTop="70dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/home_button"
+            android:src="@drawable/back_button"
             android:scaleType="center"
-            android:contentDescription="go to home" />
+            android:contentDescription="go mypage main" />
     </LinearLayout>
 
     <LinearLayout
@@ -90,52 +89,98 @@
 
     <LinearLayout
         android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:backgroundTint="@color/white"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/update_userinfo_btn"
-            android:layout_width="350dp"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="개인정보 수정하기" />
+            android:text="이메일(수정 불가)"
+            android:textSize="20sp"/>
 
-        <Button
-            android:id="@+id/review_btn"
-            android:layout_width="350dp"
+        <TextView
+            android:id="@+id/email"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:padding="10dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="내 리뷰" />
+            android:background="@drawable/not_edit_text"
+            android:text="사용자가 가입 시 입력한 이메일"
+            android:textSize="15sp"/>
+    </LinearLayout>
 
-        <Button
-            android:id="@+id/bookmark_btn"
-            android:layout_width="350dp"
+    <LinearLayout
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="북마크" />
+            android:text="비밀번호"
+            android:textSize="20sp"/>
 
-        <Button
-            android:id="@+id/logout_btn"
-            android:layout_width="350dp"
+        <EditText
+            android:id="@+id/old_pw"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:backgroundTint="@color/gray"
-            android:text="로그아웃" />
+            android:background="@drawable/edit_text"
+            android:textSize="15sp"
+            android:hint="기존 비밀번호를 입력해주세요."/>
 
-
-        <Button
-            android:id="@+id/withdraw_btn"
-            android:layout_width="350dp"
+        <EditText
+            android:id="@+id/new_pw"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:backgroundTint="@color/gray"
-            android:text="탈퇴하기" />
+            android:background="@drawable/edit_text"
+            android:textSize="15sp"
+            android:hint="새로운 비밀번호를 입력해주세요."/>
+
+        <EditText
+            android:id="@+id/new_pw_check"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_text"
+            android:textSize="15sp"
+            android:hint="새로운 비밀번호를 다시 한 번 입력해주세요."/>
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="닉네임"
+            android:textSize="20sp"/>
+
+        <EditText
+            android:id="@+id/nickname"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_text"
+            android:textSize="15sp"
+            android:hint="사용자의 닉네임"/>
+
+    </LinearLayout>
 </LinearLayout>
