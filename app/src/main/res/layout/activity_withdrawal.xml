@@ -4,7 +4,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PersonalInfoActivity"
+    tools:context=".WithdrawalActivity"
     android:orientation="vertical">
 
     <LinearLayout
@@ -88,99 +88,57 @@
     </LinearLayout>
 
     <LinearLayout
+        android:layout_marginTop="150dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="이메일(수정 불가)"
-            android:textSize="20sp"/>
+            android:text="탈퇴 시 계정 복구는 불가능합니다." />
 
         <TextView
-            android:id="@+id/email"
-            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:textSize="20sp"
             android:layout_width="match_parent"
-            android:padding="10dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/not_edit_text"
-            android:text="사용자가 가입 시 입력한 이메일"
-            android:textSize="15sp"/>
+            android:text="업로드한 리뷰는 삭제되지 않습니다." />
     </LinearLayout>
 
     <LinearLayout
         android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="150dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/check_button"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/withdrawl_check" />
 
         <TextView
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="비밀번호"
+            android:text="위의 사항을 모두 확인하였습니다."
             android:textSize="20sp"/>
-
-        <EditText
-            android:id="@+id/old_pw"
-            android:padding="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edit_text"
-            android:textSize="15sp"
-            android:hint="기존 비밀번호를 입력해주세요."/>
-
-        <EditText
-            android:id="@+id/new_pw"
-            android:padding="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edit_text"
-            android:textSize="15sp"
-            android:hint="새로운 비밀번호를 입력해주세요."/>
-
-        <EditText
-            android:id="@+id/new_pw_check"
-            android:padding="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edit_text"
-            android:textSize="15sp"
-            android:hint="새로운 비밀번호를 다시 한 번 입력해주세요."/>
-
     </LinearLayout>
 
-    <LinearLayout
+    <Button
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="탈퇴하기"
+        android:textColor="@color/white"
+        android:background="@drawable/main_button"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="닉네임"
-            android:textSize="20sp"/>
-
-        <EditText
-            android:id="@+id/nickname"
-            android:padding="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edit_text"
-            android:textSize="15sp"
-            android:hint="사용자의 닉네임"/>
-
-    </LinearLayout>
 </LinearLayout>
