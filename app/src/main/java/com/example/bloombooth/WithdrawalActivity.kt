@@ -11,5 +11,9 @@ class WithdrawalActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
+
+        binding.backBtn.setOnClickListener {
+            finish()
+        }
     }
 }
