@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -40,24 +39,38 @@ class PersonalInfoActivity : AppCompatActivity() {
             if (validateInputs()) {
                 var pwChanged = false
                 var nickNameChanged = false
-                if (isNicknameChanged()) nickNameChanged= updateUserNickname()
-                if (isPwChanged()) pwChanged = updateUserPw()
 
-                Log.d("test_nc", nickNameChanged.toString())
-                Log.d("test_pw", pwChanged.toString())
+                if (isNicknameChanged()) nickNameChanged = updateUserNickname()
+                if (isPwChanged()) {
+                    updateUserPw { success ->
+                        if (success) {
+                            pwChanged = true
+                        }
 
-                if (nickNameChanged && !pwChanged) { // 닉네임만 변경
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                        if (nickNameChanged && !pwChanged) {
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        } else if (pwChanged) {
+                            auth.signOut()
+                            val intent = Intent(this, SplashActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
                 }
-                else if (pwChanged ) {
+
+                if (pwChanged) {
                     auth.signOut()
                     val intent = Intent(this, SplashActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
-
+                if (nickNameChanged) {
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
             }
         }
     }
@@ -181,7 +194,7 @@ class PersonalInfoActivity : AppCompatActivity() {
         return isSuccess
     }
 
-    private fun updateUserPw(): Boolean {
+    private fun updateUserPw(onComplete: (Boolean) -> Unit) {
         val currentPassword = binding.oldPw.text.toString()
         val newPassword = binding.newPw.text.toString()
         val confirmPassword = binding.newPwCheck.text.toString()
@@ -189,45 +202,48 @@ class PersonalInfoActivity : AppCompatActivity() {
         if (currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
             Toast.makeText(this, "비밀번호 변경을 위해 모든 비밀번호 필드를 채워주세요.",
                 Toast.LENGTH_SHORT).show()
-            return false
+            onComplete(false)
+            return
         }
 
         if (newPassword != confirmPassword) {
             Toast.makeText(this, "새 비밀번호와 확인 비밀번호가 일치하지 않습니다.",
                 Toast.LENGTH_SHORT).show()
-            return false
+            onComplete(false)
+            return
         }
 
         val user = auth.currentUser
         val credential = EmailAuthProvider.getCredential(user?.email!!, currentPassword)
-        var isSuccess = false
+
         user.reauthenticate(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     user.updatePassword(newPassword)
                         .addOnCompleteListener { updateTask ->
                             if (updateTask.isSuccessful) {
-                                Toast.makeText(this, "비밀번호가 성공적으로 변경되었습니다."
-                                    , Toast.LENGTH_SHORT).show()
-                                isSuccess = true
-
+                                Toast.makeText(this, "비밀번호가 성공적으로 변경되었습니다.",
+                                    Toast.LENGTH_SHORT).show()
+                                clearPasswordFields()
+                                onComplete(true)
                             } else {
                                 Toast.makeText(this, "비밀번호 변경에 실패했습니다: " +
                                         "${updateTask.exception?.message}", Toast.LENGTH_SHORT).show()
-
+                                clearPasswordFields()
+                                onComplete(false)
                             }
                         }
                 } else {
-                    Toast.makeText(this, "기존 비밀번호가 올바르지 않습니다.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "기존 비밀번호가 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
+                    clearPasswordFields()
+                    onComplete(false)
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "재인증에 실패했습니다: ${e.message}",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "재인증에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                clearPasswordFields()
+                onComplete(false)
             }
-        clearPasswordFields()
-        return isSuccess
     }
 
     private fun clearPasswordFields() {
