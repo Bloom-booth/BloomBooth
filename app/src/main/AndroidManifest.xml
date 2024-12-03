@@ -15,6 +15,10 @@
         <activity
             android:name=".MypageActivity"
             android:exported="false" />
+        <activity android:name=".PersonalInfoActivity"
+            android:exported="false"/>
+        <activity android:name=".WithdrawalActivity"
+            android:exported="false"/>
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -29,7 +33,7 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
+            android:exported="false" />
     </application>
 
 </manifest>
