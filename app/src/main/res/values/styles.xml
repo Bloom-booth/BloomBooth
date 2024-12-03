@@ -4,4 +4,12 @@
         <item name="android:textAlignment">center</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
+
+    <style name="back_pink" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:background">@color/background_color</item>
+    </style>
+
+    <style name="back_white" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:background">@color/white</item>
+    </style>
 </resources>
