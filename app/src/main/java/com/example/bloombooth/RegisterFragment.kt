@@ -60,7 +60,7 @@ class RegisterFragment : Fragment() {
                 binding.emailVerificationBtn.apply {
                     text = "중복 확인"
                     isEnabled = true
-                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
+                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.grey))
                 }
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -163,7 +163,7 @@ class RegisterFragment : Fragment() {
         binding.signupBtn.setBackgroundColor(
             ContextCompat.getColor(
                 requireContext(),
-                if (isReady) R.color.pink else R.color.gray
+                if (isReady) R.color.pink else R.color.grey
             )
         )
     }

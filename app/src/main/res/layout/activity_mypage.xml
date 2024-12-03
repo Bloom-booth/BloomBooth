@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="30sp"
-                android:text="사용자의 닉네임"/>
+                android:text=""/>
 
             <TextView
                 android:layout_marginLeft="15dp"
@@ -104,7 +104,7 @@
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:backgroundTint="@color/gray"
+            android:backgroundTint="@color/grey"
             android:text="로그아웃" />
 
 
@@ -113,7 +113,7 @@
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
-            android:backgroundTint="@color/gray"
+            android:backgroundTint="@color/grey"
             android:text="탈퇴하기" />
 
     </LinearLayout>
