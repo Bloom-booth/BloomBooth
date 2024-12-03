@@ -5,9 +5,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".RegisterFragment"
     android:orientation="vertical"
+    style="@style/back_pink"
     android:layout_gravity="center">
 
     <com.google.android.material.appbar.MaterialToolbar
+        android:paddingTop="5dp"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
