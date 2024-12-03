@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMypageBinding
 
 class MypageActivity : AppCompatActivity() {
-
     val binding: ActivityMypageBinding by lazy { ActivityMypageBinding.inflate(layoutInflater) }
+    val auth = FirebaseAuthManager.auth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -30,15 +32,14 @@ class MypageActivity : AppCompatActivity() {
         }
 
         binding.logoutBtn.setOnClickListener() {
-            //logoutAndGotoSplash();
+            logoutAndGotoSplash();
         }
     }
 
-//    private fun logoutAndGotoSplash() {
-//        FirebaseAuth.getInstance().signOut()
-//
-//        val intent = Intent(this, SplashActivity::class.java)
-//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        startActivity(intent)
-//    }
+    private fun logoutAndGotoSplash() {
+        auth.signOut()
+        val intent = Intent(this, SplashActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+    }
 }
