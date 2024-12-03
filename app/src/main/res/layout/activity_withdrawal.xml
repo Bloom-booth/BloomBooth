@@ -8,45 +8,25 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:backgroundTint="@color/white"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_marginTop="30dp"
-            android:layout_marginLeft="30dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/white"
-                android:text="@string/sub_catchphrase"
-                android:fontFamily="@font/main_font"
-                android:textSize="20sp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:backgroundTint="@color/white"
-                android:textSize="40sp"
-                android:fontFamily="@font/main_font"/>
-        </LinearLayout>
+        <include
+            layout="@layout/header_mypage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/back_btn"
-            android:layout_marginLeft="110dp"
-            android:backgroundTint="@color/white"
-            android:layout_marginTop="70dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/back_button"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="70dp"
+            android:backgroundTint="@color/white"
+            android:contentDescription="go to back"
             android:scaleType="center"
-            android:contentDescription="go mypage main" />
+            android:src="@drawable/back_button" />
     </LinearLayout>
 
     <LinearLayout

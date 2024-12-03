@@ -7,47 +7,27 @@
     tools:context=".MypageActivity"
     android:orientation="vertical"
     android:backgroundTint="@color/white">
-
+    
     <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:backgroundTint="@color/white"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_marginTop="30dp"
-            android:layout_marginLeft="30dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/white"
-                android:text="@string/sub_catchphrase"
-                android:fontFamily="@font/main_font"
-                android:textSize="20sp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:backgroundTint="@color/white"
-                android:textSize="40sp"
-                android:fontFamily="@font/main_font"/>
-        </LinearLayout>
+        <include
+            layout="@layout/header_mypage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/home_btn"
-            android:layout_marginLeft="100dp"
-            android:backgroundTint="@color/white"
-            android:layout_marginTop="70dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/home_button"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="70dp"
+            android:backgroundTint="@color/white"
+            android:contentDescription="go to home"
             android:scaleType="center"
-            android:contentDescription="go to home" />
+            android:src="@drawable/home_button" />
     </LinearLayout>
 
     <LinearLayout
