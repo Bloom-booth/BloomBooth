@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    style="@style/back_white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".WithdrawalActivity"
@@ -14,14 +15,13 @@
 
         <include
             layout="@layout/header_mypage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/back_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
             android:layout_marginTop="70dp"
             android:backgroundTint="@color/white"
             android:contentDescription="go to back"
@@ -68,12 +68,20 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="80dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="정말 탈퇴하시겠습니까?"
+            android:gravity="center"
+            android:textSize="20sp"/>
 
         <TextView
             android:gravity="center"
@@ -99,11 +107,12 @@
         <Button
             android:id="@+id/check_btn"
             android:layout_width="45dp"
-            android:layout_height="45dp" />
+            android:layout_height="45dp"
+            android:background="@drawable/check_button"/>
 
         <TextView
             android:layout_gravity="center"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="위의 사항을 모두 확인하였습니다."

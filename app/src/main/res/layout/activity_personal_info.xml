@@ -15,14 +15,13 @@
 
         <include
             layout="@layout/header_mypage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/back_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
             android:layout_marginTop="70dp"
             android:backgroundTint="@color/white"
             android:contentDescription="go to back"
@@ -111,6 +110,7 @@
         <EditText
             android:id="@+id/old_pw"
             android:padding="10dp"
+            android:inputType="textPassword"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -123,6 +123,7 @@
             android:id="@+id/new_pw"
             android:padding="10dp"
             android:layout_marginTop="10dp"
+            android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/edit_text"
@@ -133,6 +134,7 @@
             android:id="@+id/new_pw_check"
             android:padding="10dp"
             android:layout_marginTop="10dp"
+            android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/edit_text"

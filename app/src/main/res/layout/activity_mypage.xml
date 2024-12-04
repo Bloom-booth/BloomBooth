@@ -15,14 +15,13 @@
 
         <include
             layout="@layout/header_mypage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/home_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
             android:layout_marginTop="70dp"
             android:backgroundTint="@color/white"
             android:contentDescription="go to home"
@@ -104,7 +103,7 @@
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:backgroundTint="@color/grey"
+            android:background="@drawable/main_button"
             android:text="로그아웃" />
 
 
@@ -113,7 +112,7 @@
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
-            android:backgroundTint="@color/grey"
+            android:background="@drawable/main_button"
             android:text="탈퇴하기" />
 
     </LinearLayout>
