@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.bloombooth.auth.FirebaseAuthManager.auth
 import com.example.bloombooth.databinding.ActivityPersonalInfoBinding
 import com.google.firebase.auth.EmailAuthProvider
@@ -29,7 +30,7 @@ class PersonalInfoActivity : AppCompatActivity() {
             binding.email.text = "이메일이 존재하지 않습니다."
         }
 
-        binding.backBtn.setOnClickListener {
+        binding.personalinfoBackBtn.setOnClickListener {
             finish()
         }
 
@@ -159,6 +160,13 @@ class PersonalInfoActivity : AppCompatActivity() {
 
     private fun updateButtonState() {
         binding.updateUserinfoBtn.isEnabled = isNicknameChanged() || isPwChanged()
+        if (isNicknameChanged() || isPwChanged()) {
+            binding.updateUserinfoBtn.backgroundTintList =
+                ContextCompat.getColorStateList(this, R.color.pink)
+        } else {
+            binding.updateUserinfoBtn.backgroundTintList =
+                ContextCompat.getColorStateList(this, R.color.light_grey)
+        }
     }
 
     private fun updateUserNickname() :Boolean{

@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.bloombooth.auth.FirebaseAuthManager.auth
 import com.example.bloombooth.databinding.ActivityWithdrawalBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -27,10 +28,12 @@ class WithdrawalActivity : AppCompatActivity() {
         }
 
         binding.checkBtn.setOnClickListener {
+            binding.checkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
             binding.withdrawBtn.isEnabled = true
+            binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
         }
 
-        binding.backBtn.setOnClickListener {
+        binding.withdrawlBackBtn.setOnClickListener {
             finish()
         }
 
