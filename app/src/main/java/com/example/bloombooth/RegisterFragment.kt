@@ -163,7 +163,7 @@ class RegisterFragment : Fragment() {
         binding.signupBtn.setBackgroundColor(
             ContextCompat.getColor(
                 requireContext(),
-                if (isReady) R.color.pink else R.color.grey
+                R.color.pink
             )
         )
     }

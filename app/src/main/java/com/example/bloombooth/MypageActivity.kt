@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMypageBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,6 +19,12 @@ class MypageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
+
+        binding.reviewBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+        binding.updateUserinfoBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+        binding.bookmarkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+        binding.logoutBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.grey)
+        binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.grey)
 
         val user = FirebaseAuthManager.auth.currentUser
         if (user != null) {
