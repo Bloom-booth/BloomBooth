@@ -23,8 +23,8 @@ class MypageActivity : AppCompatActivity() {
         binding.reviewBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
         binding.updateUserinfoBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
         binding.bookmarkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
-        binding.logoutBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.grey)
-        binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.grey)
+        binding.logoutBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
+        binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
 
         val user = FirebaseAuthManager.auth.currentUser
         if (user != null) {

@@ -104,6 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:background="@drawable/main_button"
+            android:textColor="@color/black"
             android:text="로그아웃" />
 
 
@@ -113,6 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
             android:background="@drawable/main_button"
+            android:textColor="@color/black"
             android:text="탈퇴하기" />
 
     </LinearLayout>
