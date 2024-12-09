@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.FragmentLoginBinding
@@ -26,6 +27,8 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentLoginBinding.inflate(inflater, container, false)
+        binding.loginBtn.backgroundTintList =
+            ContextCompat.getColorStateList(requireContext(), R.color.pink)
 
         emailEditText = binding.emailInput
         passwordEditText = binding.passwordInput

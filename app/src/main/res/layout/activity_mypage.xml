@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MypageActivity"
+    android:orientation="vertical"
+    android:backgroundTint="@color/white">
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <include
+            layout="@layout/header_mypage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/home_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:backgroundTint="@color/white"
+            android:contentDescription="go to home"
+            android:scaleType="center"
+            android:src="@drawable/home_button" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/user_meet_part"
+        android:orientation="vertical"
+        android:backgroundTint="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="안녕하세요!"
+            android:backgroundTint="@color/white"
+            android:textSize="24sp"/>
+
+        <LinearLayout
+            android:backgroundTint="@color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/username"
+                android:backgroundTint="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:text=""/>
+
+            <TextView
+                android:layout_marginLeft="15dp"
+                android:textSize="30sp"
+                android:backgroundTint="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="님"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginLeft="30dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:backgroundTint="@color/white"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/update_userinfo_btn"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/main_button"
+            android:text="개인정보 수정하기" />
+
+        <Button
+            android:id="@+id/review_btn"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/main_button"
+            android:text="내 리뷰" />
+
+        <Button
+            android:id="@+id/bookmark_btn"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/main_button"
+            android:text="북마크" />
+
+        <Button
+            android:id="@+id/logout_btn"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/main_button"
+            android:textColor="@color/black"
+            android:text="로그아웃" />
+
+
+        <Button
+            android:id="@+id/withdraw_btn"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/main_button"
+            android:textColor="@color/black"
+            android:text="탈퇴하기" />
+
+    </LinearLayout>
+
+</LinearLayout>

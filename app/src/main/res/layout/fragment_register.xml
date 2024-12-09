@@ -15,7 +15,7 @@
         android:layout_height="?attr/actionBarSize"
         android:backgroundTint="@color/background_color"
         android:gravity="center"
-        app:navigationIcon="@drawable/baseline_arrow_back_ios_24"
+        app:navigationIcon="@drawable/back_button"
         app:titleTextAppearance="@style/ToolbarTitle"
         app:titleCentered="true" />
 
@@ -59,7 +59,7 @@
 
             <Button
                 android:id="@+id/email_verification_btn"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/grey"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="중복 확인" />
@@ -187,7 +187,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/main_button"
             android:text="회원 가입"/>
-
     </LinearLayout>
 
 </LinearLayout>
