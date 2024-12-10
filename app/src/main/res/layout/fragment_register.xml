@@ -59,7 +59,7 @@
 
             <Button
                 android:id="@+id/email_verification_btn"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/grey"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="중복 확인" />
