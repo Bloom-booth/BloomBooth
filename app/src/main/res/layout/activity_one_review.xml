@@ -17,12 +17,13 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_marginTop="30dp"
-            android:layout_marginLeft="30dp"
+            android:layout_marginLeft="3dp"
             android:layout_marginRight="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
+                android:layout_marginLeft="30dp"
                 android:id="@+id/review_back_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,6 +65,7 @@
                 android:textSize="15sp"/>
 
             <EditText
+                android:id="@+id/reviewText"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:padding="5dp"
@@ -88,7 +90,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:padding="16dp">
 
                 <TextView
@@ -96,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="이미지는 최대 3장까지 업로드 가능합니다."
-                    android:textSize="16sp"
+                    android:textSize="11sp"
                     android:textColor="@color/black"
                     android:gravity="center" />
 

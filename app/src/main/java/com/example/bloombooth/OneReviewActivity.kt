@@ -1,32 +1,37 @@
 package com.example.bloombooth
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bloombooth.databinding.ActivityOneReviewBinding
 
 class OneReviewActivity : AppCompatActivity() {
 
     private val binding: ActivityOneReviewBinding by lazy { ActivityOneReviewBinding.inflate(layoutInflater) }
-    private val imageList = mutableListOf<String>()
     private lateinit var adapter: ImageAdapter
+
+    private val reviewViewModel: ReviewViewModel by viewModels()
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val imageUri = result.data?.data
             if (imageUri != null) {
-                if (imageList.size < 3) {
-                    imageList.add(imageUri.toString())
-                    adapter.notifyItemInserted(imageList.size - 1)
+                if ((reviewViewModel.imageList.value?.size ?: 0) < 3) {
+                    reviewViewModel.addImage(imageUri.toString())
                 } else {
                     showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")
                 }
@@ -34,17 +39,24 @@ class OneReviewActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         setupRecyclerView()
+
         binding.imageUploadBtn.backgroundTintList =
             ContextCompat.getColorStateList(this, R.color.pink)
         binding.uploadReviewFirst.backgroundTintList =
             ContextCompat.getColorStateList(this, R.color.pink)
         binding.goNextFirst.backgroundTintList =
             ContextCompat.getColorStateList(this, R.color.pink)
+
+        val reviewEditText: EditText = binding.reviewText
+        reviewEditText.addTextChangedListener {
+            reviewViewModel.saveReviewText(it.toString())
+        }
 
         binding.reviewBackBtn.setOnClickListener {
             val intent = Intent(this, DetailActivity::class.java)
@@ -56,12 +68,24 @@ class OneReviewActivity : AppCompatActivity() {
                 openGallery()
             }
         }
+
+        binding.goNextFirst.setOnClickListener {
+            val intent = Intent(this, TwoReviewActivity::class.java)
+            startActivity(intent)
+        }
+
+        reviewViewModel.imageList.observe(this, Observer {
+            adapter.notifyDataSetChanged()
+        })
+
+        reviewViewModel.reviewText.observe(this, Observer { text ->
+            reviewEditText.setText(text)
+        })
     }
 
     private fun setupRecyclerView() {
-        adapter = ImageAdapter(imageList, { position ->
-            imageList.removeAt(position)
-            adapter.notifyItemRemoved(position)
+        adapter = ImageAdapter(reviewViewModel.imageList.value ?: mutableListOf(), { position ->
+            reviewViewModel.removeImage(position)
         }, { uriString ->
             showToast("이미지 클릭: $uriString")
         })
