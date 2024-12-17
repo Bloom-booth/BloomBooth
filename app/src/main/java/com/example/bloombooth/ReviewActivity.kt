@@ -9,8 +9,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -26,15 +24,18 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import java.util.Date
 import com.cloudinary.Cloudinary
+import kotlinx.coroutines.*
 import com.cloudinary.utils.ObjectUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class ReviewActivity : AppCompatActivity() {
     private val binding: ActivityReviewBinding by lazy { ActivityReviewBinding.inflate(layoutInflater) }
     private val imageList = mutableListOf<String>()
     private lateinit var adapter: ImageAdapter
     private lateinit var numbersList: List<Int>
-    private lateinit var numbersAdapter: NumbersAdapter
-    private val TAG = "YEONJAE"
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -53,8 +54,6 @@ class ReviewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        Log.d(TAG, "생성")
         val boothName = intent.getStringExtra("boothName") ?: "업체명"
         binding.boothName.text = boothName
 
@@ -63,19 +62,7 @@ class ReviewActivity : AppCompatActivity() {
         boothCntSetting()
         addClickListeners()
         setupRadioButtons()
-        initializeCloudinary()
     }
-
-    private fun initializeCloudinary() {
-        val cloudinary = Cloudinary(
-            ObjectUtils.asMap(
-                "cloud_name", getString(R.string.cloud_name),
-                "api_key", getString(R.string.image_api_key),
-                "api_secret", getString(R.string.image_api_secret)
-            )
-        )
-    }
-
 
     private fun boothCntSetting() {
         numbersList = (1..10).toList()
@@ -112,12 +99,10 @@ class ReviewActivity : AppCompatActivity() {
 
     private fun saveReview() {
         val db = Firebase.firestore
-
-        // "선택" 값을 처리하는 로직 추가
         val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") {
-            0 // "선택"일 경우 0으로 설정
+            0
         } else {
-            binding.toggleButton.text.toString().toIntOrNull() ?: 0 // 숫자가 아닐 경우 0으로 설정
+            binding.toggleButton.text.toString().toIntOrNull() ?: 0
         }
 
         val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
@@ -134,27 +119,69 @@ class ReviewActivity : AppCompatActivity() {
 
         val reviewDate = DateFormatter.format(Date())
 
-        val reviewData = hashMapOf(
-            "review_date" to reviewDate,
-            "booth_cnt" to selectedBoothCount,
-            "accs_condi" to selectedAccsCondi,
-            "accs_cnt" to selectedAccsCnt,
-            "retouching" to selectedRetouch,
-            "review_text" to reviewText,
-            "review_rating" to rating,
-            "booth_id" to boothId,
-            "user_id" to userId
+        uploadImagesToCloudinary(imageList) { urls ->
+            val reviewData = hashMapOf(
+                "review_date" to reviewDate,
+                "booth_cnt" to selectedBoothCount,
+                "accs_condi" to selectedAccsCondi,
+                "accs_cnt" to selectedAccsCnt,
+                "retouching" to selectedRetouch,
+                "review_text" to reviewText,
+                "review_rating" to rating,
+                "booth_id" to boothId,
+                "user_id" to userId,
+                "photo_urls" to urls
+            )
+
+            db.collection("review")
+                .add(reviewData)
+                .addOnSuccessListener {
+                    showToast("리뷰가 성공적으로 등록되었습니다.")
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                }
+        }
+    }
+
+    private fun uploadImagesToCloudinary(
+        imageUris: List<String>,
+        onComplete: (List<String>) -> Unit
+    ) {
+        val cloudinary = Cloudinary(
+            ObjectUtils.asMap(
+                "cloud_name", getString(R.string.cloud_name),
+                "api_key", getString(R.string.image_api_key),
+                "api_secret", getString(R.string.image_api_secret)
+            )
         )
 
-        db.collection("review")
-            .add(reviewData)
-            .addOnSuccessListener {
-                showToast("리뷰가 성공적으로 등록되었습니다.")
-                finish()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val urls = imageUris.map { imageUri ->
+                    val inputStream = contentResolver.openInputStream(Uri.parse(imageUri))
+                    val fileName = "images/${UUID.randomUUID()}.jpg"
+
+                    inputStream?.use {
+                        val options = ObjectUtils.asMap(
+                            "public_id", fileName,
+                            "folder", "bloombooth"
+                        )
+                        val result = cloudinary.uploader().upload(it, options)
+                        result["url"].toString()
+                    } ?: throw Exception("Invalid input stream for URI: $imageUri")
+                }
+
+                withContext(Dispatchers.Main) {
+                    onComplete(urls) 
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToast("이미지 업로드 중 오류가 발생했습니다: ${e.message}")
+                }
             }
-            .addOnFailureListener { e ->
-                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-            }
+        }
     }
 
 
@@ -277,5 +304,4 @@ class ReviewActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
     }
-
 }
