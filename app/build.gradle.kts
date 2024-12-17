@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.runner)
     implementation(libs.androidx.espresso.intents)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     implementation("com.github.bumptech.glide:glide:4.15.1")
     androidTestImplementation(libs.androidx.junit)
