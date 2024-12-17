@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/rating_icon_on" />
-    <item android:state_selected="true" android:drawable="@drawable/rating_icon_on" />
-    <item android:state_checked="true" android:drawable="@drawable/rating_icon_on" />
-    <item android:drawable="@drawable/rating_icon_off" />
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <drawable android:src="@drawable/rating_icon_off" />
+    </item>
+
+    <item android:id="@android:id/secondaryProgress">
+        <drawable android:src="@drawable/rating_icon_off" />
+    </item>
+
+    <item android:id="@android:id/progress">
+        <drawable android:src="@drawable/rating_icon_on" />
+    </item>
+</layer-list>

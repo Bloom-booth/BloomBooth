@@ -386,8 +386,6 @@
                     android:numStars="5"
                     android:stepSize="1"
                     android:rating="0" />
-
-
             </LinearLayout>
 
             <Button
