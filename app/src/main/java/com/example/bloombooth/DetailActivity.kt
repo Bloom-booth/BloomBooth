@@ -13,9 +13,13 @@ class DetailActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(binding.root)
 
+        val boothId = "부스아이디"
+        val boothName = "현재 가게 이름"
+
         binding.writeReviewBtn.setOnClickListener {
             val intent = Intent(this, ReviewActivity::class.java)
-            intent.putExtra("boothName", "현재 가게 이름")  // value에 가게 이름 넣어주세요!
+            intent.putExtra("boothName", boothName)
+            intent.putExtra("boothId", boothId)
             startActivity(intent)
         }
     }
