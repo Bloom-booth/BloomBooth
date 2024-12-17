@@ -47,7 +47,8 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.picasso)
+    implementation(libs.cloudinary.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -60,17 +61,17 @@ dependencies {
     implementation(libs.androidx.espresso.intents)
     implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
-    implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation(libs.glide)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    testImplementation(platform("org.mockito:mockito-core:4.11.0"))
+    androidTestImplementation(libs.androidx.runner.v152)
+    testImplementation(platform("org.mockito:mockito-core:5.14.2"))
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.fragment.testing)
     androidTestImplementation(libs.mockito)
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
 
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     // TODO: Add the dependencies for Firebase products you want to use
