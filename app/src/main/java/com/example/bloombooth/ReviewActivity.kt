@@ -202,12 +202,22 @@ class ReviewActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun getSelectedRadioButtonId(group: RadioGroup): Int {
-        val selectedRadioButton = group.findViewById<RadioButton>(group.checkedRadioButtonId)
+    private fun getSelectedRadioButtonId(radioGroup: RadioGroup): Int {
+        val selectedRadioButtonId = radioGroup.checkedRadioButtonId
+        val selectedRadioButton = findViewById<RadioButton>(selectedRadioButtonId)
         val selectedText = selectedRadioButton?.text.toString()
 
-        return selectedText.toIntOrNull() ?: 0
+        return when (selectedText) {
+            "없음" -> 1
+            "적음" -> 2
+            "나쁨" -> 2
+            "보통" -> 3
+            "좋음" -> 4
+            "많음" -> 4
+            else -> 0 
+        }
     }
+
 
     private fun showNumberDialog() {
         val dialog = AlertDialog.Builder(this)
