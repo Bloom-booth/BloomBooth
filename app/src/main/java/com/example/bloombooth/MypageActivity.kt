@@ -38,6 +38,11 @@ class MypageActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.reviewBtn.setOnClickListener {
+            val intent = Intent(this, MyReviewActivity::class.java)
+            startActivity(intent)
+        }
+
         binding.updateUserinfoBtn.setOnClickListener {
             val intent = Intent(this, PersonalInfoActivity::class.java)
             startActivity(intent)
