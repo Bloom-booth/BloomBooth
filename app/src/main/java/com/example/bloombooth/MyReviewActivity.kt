@@ -1,7 +1,6 @@
 package com.example.bloombooth
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -9,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMyReviewBinding
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 
 class MyReviewActivity : AppCompatActivity() {
     private val binding: ActivityMyReviewBinding by lazy { ActivityMyReviewBinding.inflate(layoutInflater) }
@@ -47,8 +45,6 @@ class MyReviewActivity : AppCompatActivity() {
 
                     if (reviewIds.isNotEmpty()) {
                         fetchReviewsByIds(reviewIds)
-                    } else {
-                        Toast.makeText(this, "등록된 리뷰가 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(this, "사용자 데이터를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -82,8 +78,8 @@ class MyReviewActivity : AppCompatActivity() {
     private fun fetchReviewsByIds(reviewIds: List<String>) {
         if (reviewIds.isEmpty()) return
 
-        val fetchedReviews = mutableListOf<ReviewItem>()  // 리뷰 데이터를 저장할 리스트
-        var fetchedCount = 0  // 가져온 리뷰 개수 추적
+        val fetchedReviews = mutableListOf<ReviewItem>()
+        var fetchedCount = 0
 
         for (reviewId in reviewIds) {
             db.collection("review").document(reviewId)
@@ -102,28 +98,30 @@ class MyReviewActivity : AppCompatActivity() {
                         val userName = document.getString("user_name") ?: ""
                         val photoUrls = document.get("photo_urls") as? List<String> ?: emptyList()
 
-                        // ReviewItem 객체로 데이터를 변환
-                        val reviewItem = ReviewItem(
-                            review_date = reviewDateString,
-                            booth_cnt = boothCnt,
-                            accs_condi = accsCondi,
-                            accs_cnt = accsCnt,
-                            retouching = retouching,
-                            review_rating = reviewRating,
-                            booth_id = boothId,
-                            user_id = userId,
-                            user_name = userName,
-                            review_text = reviewText,
-                            photo_urls = photoUrls
-                        )
+                        val reviewId = document.id
+                        fetchBoothName(boothId) { boothName ->
+                            // ReviewItem 객체로 데이터를 변환
+                            val reviewItem = ReviewItem(
+                                review_date = reviewDateString,
+                                booth_cnt = boothCnt,
+                                accs_condi = accsCondi,
+                                accs_cnt = accsCnt,
+                                retouching = retouching,
+                                review_rating = reviewRating,
+                                booth_id = boothId,
+                                booth_name = boothName,
+                                user_id = userId,
+                                user_name = userName,
+                                review_text = reviewText,
+                                photo_urls = photoUrls,
+                                review_id = reviewId
+                            )
 
-                        // 가져온 리뷰 데이터를 리스트에 추가
-                        fetchedReviews.add(reviewItem)
-
-                        // 모든 리뷰를 가져왔다면 UI 업데이트
-                        fetchedCount++
-                        if (fetchedCount == reviewIds.size) {
-                            updateUIWithReviews(fetchedReviews)  // 리뷰 UI 업데이트 함수 호출
+                            fetchedReviews.add(reviewItem)
+                            fetchedCount++
+                            if (fetchedCount == reviewIds.size) {
+                                updateUIWithReviews(fetchedReviews)
+                            }
                         }
                     } else {
                         Toast.makeText(this, "리뷰 데이터를 찾을 수 없습니다. ID: $reviewId", Toast.LENGTH_SHORT).show()
@@ -135,18 +133,33 @@ class MyReviewActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUIWithReviews(fetchedReviews: List<ReviewItem>) {
-        // RecyclerView에 리뷰 데이터를 설정
+    private fun fetchBoothName(boothId: String, callback: (String) -> Unit) {
+        if (boothId.isNotEmpty()) {
+            db.collection("booth").document(boothId)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val boothName = document.getString("booth_name") ?: "부스 이름 없음"
+                        callback(boothName)
+                    } else {
+                        callback("부스 이름 없음")
+                    }
+                }
+                .addOnFailureListener {
+                    callback("부스 이름 없음")
+                }
+        } else {
+            callback("부스 이름 없음")
+        }
+    }
+
+    private fun updateUIWithReviews(fetchedReviews: MutableList<ReviewItem>) {
         setupRecyclerView(fetchedReviews)
     }
 
-    private fun setupRecyclerView(reviews: List<ReviewItem>) {
+    private fun setupRecyclerView(reviews: MutableList<ReviewItem>) {
         mypageReviewAdapter = MypageReviewAdapter(this, reviews)
         binding.recyclerViewReviews.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewReviews.adapter = mypageReviewAdapter
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
