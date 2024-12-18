@@ -1,6 +1,7 @@
 package com.example.bloombooth
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -52,20 +53,21 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
                 deleteReview(review)
             }
 
-//            binding.reviewEditBtn.setOnClickListener {
-//                val intent = Intent(context, ReviewEditActivity::class.java).apply {
-//                    putExtra("review_id", review.review_id)
-//                    putExtra("review_text", review.review_text)
-//                    putExtra("review_rating", review.review_rating)
-//                    putExtra("booth_name", review.booth_name)
-//                    putExtra("booth_id", review.booth_id)
-//                    putExtra("booth_cnt", review.booth_cnt)
-//                    putExtra("accs_cnt", review.accs_cnt)
-//                    putExtra("accs_condi",review.accs_condi)
-//                    putExtra("retouch", review.retouching)
-//                }
-//                context.startActivity(intent)
-//            }
+            binding.reviewEditBtn.setOnClickListener {
+                val intent = Intent(context, ReviewEditActivity::class.java).apply {
+                    putExtra("review_id", review.review_id)
+                    putExtra("review_text", review.review_text)
+                    putExtra("review_rating", review.review_rating)
+                    putExtra("review_date", review.review_date)
+                    putExtra("booth_id", review.booth_id)
+                    putExtra("booth_cnt", review.booth_cnt)
+                    putExtra("accs_cnt", review.accs_cnt)
+                    putStringArrayListExtra("photo_urls", ArrayList(review.photo_urls))
+                    putExtra("accs_condi",review.accs_condi)
+                    putExtra("retouching", review.retouching)
+                }
+                context.startActivity(intent)
+            }
             val photoAdapter = PhotoAdapter(review.photo_urls)
             binding.reviewImages.adapter = photoAdapter
             binding.reviewImages.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
