@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bloombooth.databinding.ItemUserBookmarkBinding
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MypageBookmarkAdapter(
@@ -40,7 +41,6 @@ class MypageBookmarkAdapter(
                 .setTitle("북마크 삭제")
                 .setMessage("정말로 이 북마크를 삭제하시겠습니까?")
                 .setPositiveButton("예") { _, _ ->
-                    // 북마크 삭제
                     deleteBookmarkFromDatabase(item.id, position, holder.itemView.context)
                 }
                 .setNegativeButton("아니오", null)
@@ -55,10 +55,13 @@ class MypageBookmarkAdapter(
     }
 
     private fun deleteBookmarkFromDatabase(bookmarkId: String, position: Int, context: Context) {
-        // Firestore에서 북마크 삭제
-        val userBookmarksRef = db.collection("user").document(userId).collection("bookmark")
+        val userRef = db.collection("user").document(userId)
+        val bookmarkToDelete = mapOf(
+            "id" to bookmarkId,
+            "name" to items[position].name
+        )
 
-        userBookmarksRef.document(bookmarkId).delete()
+        userRef.update("bookmark", FieldValue.arrayRemove(bookmarkToDelete))
             .addOnSuccessListener {
                 Log.d("Bookmark", "Bookmark deleted successfully")
 
@@ -72,4 +75,5 @@ class MypageBookmarkAdapter(
                 Toast.makeText(context, "북마크 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 }
