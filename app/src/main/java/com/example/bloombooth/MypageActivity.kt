@@ -43,6 +43,11 @@ class MypageActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.bookmarkBtn.setOnClickListener {
+            val intent = Intent(this, BookmarkActivity::class.java)
+            startActivity(intent)
+        }
+
         binding.withdrawBtn.setOnClickListener {
             val intent = Intent(this, WithdrawalActivity::class.java)
             startActivity(intent)
