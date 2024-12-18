@@ -67,18 +67,19 @@ class WithdrawalActivity : AppCompatActivity() {
             val db = FirebaseFirestore.getInstance()
 
             val deletedUserName = "알수없음"
+            val newUserId = getString(R.string.delete_user_id)
 
             db.collection("user").document(userId)
                 .delete()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         db.collection("review")
-                            .whereEqualTo("userId", userId)
+                            .whereEqualTo("user_id", userId)
                             .get()
                             .addOnSuccessListener { querySnapshot ->
                                 for (document in querySnapshot) {
                                     db.collection("reviews").document(document.id)
-                                        .update("userName", deletedUserName)
+                                        .update("user_id", newUserId, "user_name", deletedUserName)
                                         .addOnFailureListener { e ->
                                             Log.w("Withdrawal", "리뷰 업데이트 실패: ${e.message}")
                                         }
@@ -111,4 +112,5 @@ class WithdrawalActivity : AppCompatActivity() {
             Toast.makeText(this, "로그인된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
 }

@@ -120,6 +120,8 @@ class ReviewActivity : AppCompatActivity() {
 
         val reviewDate = DateFormatter.format(Date())
 
+        val userName = FirebaseAuthManager.auth.currentUser?.displayName ?: "알수없음"
+
         uploadImagesToCloudinary(imageList) { urls ->
             val reviewData = hashMapOf(
                 "review_date" to reviewDate,
@@ -131,6 +133,7 @@ class ReviewActivity : AppCompatActivity() {
                 "review_rating" to rating,
                 "booth_id" to boothId,
                 "user_id" to userId,
+                "user_name" to userName,
                 "photo_urls" to urls
             )
 
@@ -156,7 +159,6 @@ class ReviewActivity : AppCompatActivity() {
                 }
         }
     }
-
 
     private fun uploadImagesToCloudinary(
         imageUris: List<String>,
