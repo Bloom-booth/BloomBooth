@@ -52,29 +52,42 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
                 deleteReview(review)
             }
 
+//            binding.reviewEditBtn.setOnClickListener {
+//                val intent = Intent(context, ReviewEditActivity::class.java).apply {
+//                    putExtra("review_id", review.review_id)
+//                    putExtra("review_text", review.review_text)
+//                    putExtra("review_rating", review.review_rating)
+//                    putExtra("booth_name", review.booth_name)
+//                    putExtra("booth_id", review.booth_id)
+//                    putExtra("booth_cnt", review.booth_cnt)
+//                    putExtra("accs_cnt", review.accs_cnt)
+//                    putExtra("accs_condi",review.accs_condi)
+//                    putExtra("retouch", review.retouching)
+//                }
+//                context.startActivity(intent)
+//            }
             val photoAdapter = PhotoAdapter(review.photo_urls)
             binding.reviewImages.adapter = photoAdapter
             binding.reviewImages.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         private fun deleteReview(review: ReviewItem) {
-            val reviewId = review.review_id // review_id 사용
+            val reviewId = review.review_id
             val userId = FirebaseAuthManager.auth.currentUser?.uid
             if (userId != null) {
-                // Firestore에서 해당 리뷰 삭제
                 db.collection("review").document(reviewId)
                     .delete()
                     .addOnSuccessListener {
-                        // Firestore에서 사용자의 리뷰 목록 업데이트
                         val userRef = db.collection("user").document(userId)
                         userRef.update("review_ids", FieldValue.arrayRemove(reviewId))
                             .addOnSuccessListener {
-                                // 삭제 완료 후 데이터 새로고침
-                                Toast.makeText(context, "리뷰가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                                fetchReviews()  // 전체 리뷰 목록을 다시 가져오는 함수 호출
+                                reviewList.remove(review)
+                                notifyDataSetChanged()
+
+                                Toast.makeText(context, "리뷰가 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                             }
                             .addOnFailureListener { e ->
-                                Toast.makeText(context, "사용자의 리뷰 목록을 업데이트하는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "리뷰 목록을 업데이트하는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                     }
                     .addOnFailureListener { e ->
@@ -82,72 +95,6 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
                         Toast.makeText(context, "리뷰 삭제에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
-        }
-
-        private fun fetchReviews() {
-            // 리뷰 데이터를 Firestore에서 새로 가져오는 로직
-            db.collection("review")
-                .get()
-                .addOnSuccessListener { documents ->
-                    val updatedReviews = mutableListOf<ReviewItem>()
-                    for (document in documents) {
-                        val reviewText = document.getString("review_text") ?: "리뷰 내용 없음"
-                        val reviewRating = document.getLong("review_rating")?.toInt() ?: 0
-                        val reviewDateString = document.getString("review_date") ?: "날짜 없음"
-                        val boothCnt = document.getLong("booth_cnt")?.toInt() ?: 0
-                        val accsCondi = document.getLong("accs_condi")?.toInt() ?: 0
-                        val accsCnt = document.getLong("accs_cnt")?.toInt() ?: 0
-                        val retouching = document.getLong("retouching")?.toInt() ?: 0
-                        val boothId = document.getString("booth_id") ?: ""
-                        val userId = document.getString("user_id") ?: ""
-                        val userName = document.getString("user_name") ?: ""
-                        val photoUrls = document.get("photo_urls") as? List<String> ?: emptyList()
-
-                        // booth_id에 해당하는 booth_name을 가져오는 Firestore 쿼리 추가
-                        if (boothId.isNotEmpty()) {
-                            db.collection("booth").document(boothId)
-                                .get()
-                                .addOnSuccessListener { boothDoc ->
-                                    if (boothDoc.exists()) {
-                                        val boothName = boothDoc.getString("booth_name") ?: "Booth 이름 없음"
-                                        // ReviewItem 객체로 데이터를 변환
-                                        val reviewItem = ReviewItem(
-                                            review_date = reviewDateString,
-                                            booth_cnt = boothCnt,
-                                            accs_condi = accsCondi,
-                                            accs_cnt = accsCnt,
-                                            retouching = retouching,
-                                            review_rating = reviewRating,
-                                            booth_id = boothId,
-                                            user_id = userId,
-                                            user_name = userName,
-                                            review_text = reviewText,
-                                            photo_urls = photoUrls,
-                                            booth_name = boothName
-                                        )
-                                        // 업데이트된 리뷰 데이터를 리스트에 추가
-                                        updatedReviews.add(reviewItem)
-
-                                        // UI 업데이트: 전체 리뷰 목록을 업데이트
-                                        updateUIWithReviews(updatedReviews)
-                                    }
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("FetchBooth", "Error fetching booth data: ${e.message}")
-                                }
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(context, "리뷰 데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-
-        private fun updateUIWithReviews(reviews: List<ReviewItem>) {
-            // 어댑터에 새 데이터를 업데이트
-            reviewList.clear()
-            reviewList.addAll(reviews)
-            notifyDataSetChanged() // 전체 어댑터에 데이터가 변경되었음을 알림
         }
 
         fun changeValueToWordStatus(i: Int): String {
@@ -189,10 +136,18 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
         inner class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
             private val imageView: ImageView = itemView.findViewById(R.id.image_thumbnail)
+            private fun ensureHttps(url: String): String {
+                return if (url.startsWith("http://")) {
+                    url.replaceFirst("http://", "https://")
+                } else {
+                    url
+                }
+            }
 
             fun bind(imageUrl: String) {
+                val secureImageUrl = ensureHttps(imageUrl)
                 Glide.with(itemView.context)
-                    .load(imageUrl)
+                    .load(secureImageUrl)
                     .error(R.drawable.error_image)
                     .into(imageView)
             }
