@@ -33,6 +33,7 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
             binding.accessoryCondition.text = "액세서리 상태: ${review.accs_condi}"
             binding.accessoryCount.text = "액세서리 수: ${review.accs_cnt}"
             binding.retouchingStatus.text = "리터칭 상태: ${review.retouching}"
+            binding.reviewUsername.text = review.user_name
             binding.reviewText.text = review.review_text
             binding.ratingBar.rating = review.review_rating.toFloat()
             val photoAdapter = PhotoAdapter(review.photo_urls)

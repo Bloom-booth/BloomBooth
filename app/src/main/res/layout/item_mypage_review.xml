@@ -14,6 +14,12 @@
         android:textColor="#666" />
 
     <TextView
+        android:id="@+id/reviewUsername"
+        android:layout_width="wrap_content"
+        android:text="username"
+        android:layout_height="wrap_content"/>
+
+    <TextView
         android:id="@+id/boothCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,6 +54,7 @@
         android:textSize="14sp"
         android:textColor="#000"
         android:layout_marginTop="8dp"/>
+
 
     <TextView
         android:id="@+id/reviewText"

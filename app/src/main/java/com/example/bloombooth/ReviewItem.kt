@@ -1,7 +1,5 @@
 package com.example.bloombooth
 
-import java.util.Date
-
 data class ReviewItem(
     val review_date: String = "",
     val booth_cnt: Int = 0,
@@ -11,6 +9,7 @@ data class ReviewItem(
     val review_rating: Int = 0,
     val booth_id: String = "",
     val user_id: String = "",
+    val user_name:String = "",
     val review_text: String = "",
     val photo_urls: List<String> = emptyList()
 )
