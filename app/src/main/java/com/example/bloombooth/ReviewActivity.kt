@@ -120,45 +120,51 @@ class ReviewActivity : AppCompatActivity() {
 
         val reviewDate = DateFormatter.format(Date())
 
-        val userName = FirebaseAuthManager.auth.currentUser?.displayName ?: "알수없음"
+        val userRef = db.collection("user").document(userId!!)
+        userRef.get().addOnSuccessListener { documentSnapshot ->
+            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
 
-        uploadImagesToCloudinary(imageList) { urls ->
-            val reviewData = hashMapOf(
-                "review_date" to reviewDate,
-                "booth_cnt" to selectedBoothCount,
-                "accs_condi" to selectedAccsCondi,
-                "accs_cnt" to selectedAccsCnt,
-                "retouching" to selectedRetouch,
-                "review_text" to reviewText,
-                "review_rating" to rating,
-                "booth_id" to boothId,
-                "user_id" to userId,
-                "user_name" to userName,
-                "photo_urls" to urls
-            )
+            uploadImagesToCloudinary(imageList) { urls ->
+                val reviewData = hashMapOf(
+                    "review_date" to reviewDate,
+                    "booth_cnt" to selectedBoothCount,
+                    "accs_condi" to selectedAccsCondi,
+                    "accs_cnt" to selectedAccsCnt,
+                    "retouching" to selectedRetouch,
+                    "review_text" to reviewText,
+                    "review_rating" to rating,
+                    "booth_id" to boothId,
+                    "user_id" to userId,
+                    "user_name" to userName,
+                    "photo_urls" to urls
+                )
 
-            db.collection("review")
-                .add(reviewData)
-                .addOnSuccessListener { documentReference ->
-                    val reviewId = documentReference.id
+                db.collection("review")
+                    .add(reviewData)
+                    .addOnSuccessListener { documentReference ->
+                        val reviewId = documentReference.id
 
-                    if (userId != null) {
-                        db.collection("user").document(userId)
-                            .update("reviewIds", FieldValue.arrayUnion(reviewId))
-                            .addOnSuccessListener {
-                                showToast("리뷰가 성공적으로 등록되었습니다.")
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-                            }
+                        if (userId != null) {
+                            db.collection("user").document(userId)
+                                .update("reviewIds", FieldValue.arrayUnion(reviewId))
+                                .addOnSuccessListener {
+                                    showToast("리뷰가 성공적으로 등록되었습니다.")
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                                }
+                        }
                     }
-                }
-                .addOnFailureListener { e ->
-                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-                }
+                    .addOnFailureListener { e ->
+                        showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                    }
+            }
+        }.addOnFailureListener { e ->
+            showToast("사용자 정보를 불러오는 데 실패했습니다.")
         }
     }
+
 
     private fun uploadImagesToCloudinary(
         imageUris: List<String>,

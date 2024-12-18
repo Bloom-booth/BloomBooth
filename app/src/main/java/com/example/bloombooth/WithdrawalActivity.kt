@@ -79,7 +79,7 @@ class WithdrawalActivity : AppCompatActivity() {
                             .addOnSuccessListener { querySnapshot ->
                                 for (document in querySnapshot) {
                                     db.collection("reviews").document(document.id)
-                                        .update("user_id", newUserId, "user_name", deletedUserName)
+                                        .update("user_id", newUserId, "nickname", deletedUserName)
                                         .addOnFailureListener { e ->
                                             Log.w("Withdrawal", "리뷰 업데이트 실패: ${e.message}")
                                         }
