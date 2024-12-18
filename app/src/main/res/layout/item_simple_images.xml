@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/image_thumbnail"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:scaleType="centerCrop"
         android:contentDescription="Uploaded image thumbnail" />
 </LinearLayout>
