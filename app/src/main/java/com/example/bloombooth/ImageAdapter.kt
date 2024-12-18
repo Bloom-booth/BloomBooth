@@ -15,17 +15,20 @@ class ImageAdapter(
 
     inner class ImageViewHolder(private val binding: ItemImageThumbnailBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
         fun bind(imagePath: String, position: Int) {
+            val secureImageUrl = if (imagePath.startsWith("http://")) {
+                imagePath.replace("http://", "https://")
+            } else {
+                imagePath
+            }
+
             Glide.with(binding.root.context)
-                .load(imagePath)
+                .load(secureImageUrl)
                 .placeholder(R.drawable.loading_image)
                 .error(R.drawable.error_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(binding.imageThumbnail)
-
-            binding.imageThumbnail.setOnClickListener {
-                onImageClick(imagePath)
-            }
 
             binding.deleteButton.setOnClickListener {
                 it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {

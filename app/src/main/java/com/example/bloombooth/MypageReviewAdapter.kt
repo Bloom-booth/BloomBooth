@@ -93,7 +93,6 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
                             }
                     }
                     .addOnFailureListener { e ->
-                        // 리뷰 삭제 실패 시 메시지
                         Toast.makeText(context, "리뷰 삭제에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }

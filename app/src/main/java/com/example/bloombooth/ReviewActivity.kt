@@ -205,7 +205,6 @@ class ReviewActivity : AppCompatActivity() {
         }
     }
 
-
     private fun validateRating(): Boolean {
         val rating = binding.ratingBar.rating
         return rating > 0
@@ -238,7 +237,6 @@ class ReviewActivity : AppCompatActivity() {
             else -> 0 
         }
     }
-
 
     private fun showNumberDialog() {
         val dialog = AlertDialog.Builder(this)

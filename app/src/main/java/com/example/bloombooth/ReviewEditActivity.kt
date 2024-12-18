@@ -3,7 +3,6 @@ package com.example.bloombooth
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -40,7 +39,7 @@ class ReviewEditActivity : AppCompatActivity() {
         boothCntSetting()
         addClickListeners()
         setupRadioButtons()
-        
+
         val reviewId = intent.getStringExtra("review_id")
         val reviewText = intent.getStringExtra("review_text")
         val reviewRating = intent.getIntExtra("review_rating", 0)
@@ -206,13 +205,17 @@ class ReviewEditActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        val imageList = ArrayList<String>(intent.getStringArrayListExtra("photo_urls") ?: arrayListOf())
         adapter = ImageAdapter(imageList, { position ->
             imageList.removeAt(position)
             adapter.notifyItemRemoved(position)
         }, { _ -> })
+
+        // RecyclerView 설정
         binding.imageThumbnailList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.imageThumbnailList.adapter = adapter
     }
+
 
     private fun checkAndRequestPermission(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
