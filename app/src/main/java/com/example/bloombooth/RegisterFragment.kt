@@ -201,7 +201,7 @@ class RegisterFragment : Fragment() {
                             "email" to email,
                             "user_id" to it.uid,
                             "bookmark" to mutableListOf<Map<String, String>>(),
-                            "reviewIds" to mutableListOf<String>()
+                            "review_ids" to mutableListOf<String>()
                         )
 
                         val db = FirebaseFirestore.getInstance()

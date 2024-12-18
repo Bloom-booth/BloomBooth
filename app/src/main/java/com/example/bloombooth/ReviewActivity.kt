@@ -146,7 +146,7 @@ class ReviewActivity : AppCompatActivity() {
 
                         if (userId != null) {
                             db.collection("user").document(userId)
-                                .update("reviewIds", FieldValue.arrayUnion(reviewId))
+                                .update("review_ids", FieldValue.arrayUnion(reviewId))
                                 .addOnSuccessListener {
                                     showToast("리뷰가 성공적으로 등록되었습니다.")
                                     finish()
