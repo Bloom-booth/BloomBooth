@@ -26,6 +26,7 @@ import java.util.Date
 import com.cloudinary.Cloudinary
 import kotlinx.coroutines.*
 import com.cloudinary.utils.ObjectUtils
+import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -135,15 +136,27 @@ class ReviewActivity : AppCompatActivity() {
 
             db.collection("review")
                 .add(reviewData)
-                .addOnSuccessListener {
-                    showToast("리뷰가 성공적으로 등록되었습니다.")
-                    finish()
+                .addOnSuccessListener { documentReference ->
+                    val reviewId = documentReference.id
+
+                    if (userId != null) {
+                        db.collection("user").document(userId)
+                            .update("reviewIds", FieldValue.arrayUnion(reviewId))
+                            .addOnSuccessListener {
+                                showToast("리뷰가 성공적으로 등록되었습니다.")
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                            }
+                    }
                 }
                 .addOnFailureListener { e ->
                     showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
                 }
         }
     }
+
 
     private fun uploadImagesToCloudinary(
         imageUris: List<String>,
