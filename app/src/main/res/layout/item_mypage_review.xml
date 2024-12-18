@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/reviewDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2024-12-18"
+        android:textSize="12sp"
+        android:textColor="#666" />
+
+    <TextView
+        android:id="@+id/boothCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="부스 수: 3"
+        android:textSize="14sp"
+        android:textColor="#000"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/accessoryCondition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="액세서리 상태: 좋음"
+        android:textSize="14sp"
+        android:textColor="#000"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/accessoryCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="액세서리 수: 2"
+        android:textSize="14sp"
+        android:textColor="#000"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/retouchingStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="리터칭 상태: 완료"
+        android:textSize="14sp"
+        android:textColor="#000"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/reviewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="리뷰 내용이 여기에 표시됩니다."
+        android:textSize="16sp"
+        android:textColor="#000"
+        android:layout_marginTop="8dp" />
+
+    <!-- 평점 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="평점:"
+            android:textSize="14sp"
+            android:textColor="#333" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rating="4.5"
+            android:stepSize="0.5"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewReviews"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="horizontal"
+        android:padding="8dp" />
+
+</LinearLayout>
