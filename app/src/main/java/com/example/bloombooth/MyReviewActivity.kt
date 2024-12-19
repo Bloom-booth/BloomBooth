@@ -1,7 +1,5 @@
 package com.example.bloombooth
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -9,10 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMyReviewBinding
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class MyReviewActivity : AppCompatActivity() {
-    private val REVIEW_EDIT_REQUEST_CODE = 100
     private val binding: ActivityMyReviewBinding by lazy { ActivityMyReviewBinding.inflate(layoutInflater) }
     private val db = FirebaseFirestore.getInstance()
     private lateinit var mypageReviewAdapter: MypageReviewAdapter
@@ -78,62 +77,60 @@ class MyReviewActivity : AppCompatActivity() {
             }
     }
 
-
     private fun fetchReviewsByIds(reviewIds: List<String>) {
         if (reviewIds.isEmpty()) return
 
         val fetchedReviews = mutableListOf<ReviewItem>()
         var fetchedCount = 0
 
-        for (reviewId in reviewIds) {
-            db.collection("review").document(reviewId)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val reviewText = document.getString("review_text") ?: "리뷰 내용 없음"
-                        val reviewRating = document.getLong("review_rating")?.toInt() ?: 0
-                        val reviewDateString = document.getString("review_date") ?: "날짜 없음"
-                        val boothCnt = document.getLong("booth_cnt")?.toInt() ?: 0
-                        val accsCondi = document.getLong("accs_condi")?.toInt() ?: 0
-                        val accsCnt = document.getLong("accs_cnt")?.toInt() ?: 0
-                        val retouching = document.getLong("retouching")?.toInt() ?: 0
-                        val boothId = document.getString("booth_id") ?: ""
-                        val userId = document.getString("user_id") ?: ""
-                        val userName = document.getString("user_name") ?: ""
-                        val photoUrls = document.get("photo_urls") as? List<String> ?: emptyList()
+        val reviewQuery = db.collection("review")
+            .whereIn(FieldPath.documentId(), reviewIds)
+            .orderBy("review_date", Query.Direction.DESCENDING)
 
-                        val reviewId = document.id
-                        fetchBoothName(boothId) { boothName ->
-                            val reviewItem = ReviewItem(
-                                review_date = reviewDateString,
-                                booth_cnt = boothCnt,
-                                accs_condi = accsCondi,
-                                accs_cnt = accsCnt,
-                                retouching = retouching,
-                                review_rating = reviewRating,
-                                booth_id = boothId,
-                                booth_name = boothName,
-                                user_id = userId,
-                                user_name = userName,
-                                review_text = reviewText,
-                                photo_urls = photoUrls,
-                                review_id = reviewId
-                            )
+        reviewQuery.get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val reviewText = document.getString("review_text") ?: "리뷰 내용 없음"
+                    val reviewRating = document.getLong("review_rating")?.toInt() ?: 0
+                    val reviewDateString = document.getString("review_date") ?: "날짜 없음"
+                    val boothCnt = document.getLong("booth_cnt")?.toInt() ?: 0
+                    val accsCondi = document.getLong("accs_condi")?.toInt() ?: 0
+                    val accsCnt = document.getLong("accs_cnt")?.toInt() ?: 0
+                    val retouching = document.getLong("retouching")?.toInt() ?: 0
+                    val boothId = document.getString("booth_id") ?: ""
+                    val userId = document.getString("user_id") ?: ""
+                    val userName = document.getString("user_name") ?: ""
+                    val photoUrls = document.get("photo_urls") as? List<String> ?: emptyList()
 
-                            fetchedReviews.add(reviewItem)
-                            fetchedCount++
-                            if (fetchedCount == reviewIds.size) {
-                                updateUIWithReviews(fetchedReviews)
-                            }
+                    val reviewId = document.id
+                    fetchBoothName(boothId) { boothName ->
+                        val reviewItem = ReviewItem(
+                            review_date = reviewDateString,
+                            booth_cnt = boothCnt,
+                            accs_condi = accsCondi,
+                            accs_cnt = accsCnt,
+                            retouching = retouching,
+                            review_rating = reviewRating,
+                            booth_id = boothId,
+                            booth_name = boothName,
+                            user_id = userId,
+                            user_name = userName,
+                            review_text = reviewText,
+                            photo_urls = photoUrls,
+                            review_id = reviewId
+                        )
+
+                        fetchedReviews.add(reviewItem)
+                        fetchedCount++
+                        if (fetchedCount == reviewIds.size) {
+                            updateUIWithReviews(fetchedReviews)
                         }
-                    } else {
-                        Toast.makeText(this, "리뷰 데이터를 찾을 수 없습니다. ID: $reviewId", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "리뷰 데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "리뷰 데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun fetchBoothName(boothId: String, callback: (String) -> Unit) {
