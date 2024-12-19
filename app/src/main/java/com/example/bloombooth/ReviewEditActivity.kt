@@ -50,7 +50,8 @@ class ReviewEditActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             val imageUri = result.data?.data
             if (imageUri != null) {
-                if (newImages.size < 3) {
+                val currentImageCount = adapter.getItemCount() 
+                if (currentImageCount < 3) {
                     newImages.clear()
                     newImages.add(imageUri.toString())
                     adapter.addNewImage(imageUri.toString())
@@ -217,7 +218,7 @@ class ReviewEditActivity : AppCompatActivity() {
 
         }.addOnFailureListener { e ->
             showToast("사용자 정보를 불러오는 데 실패했습니다.")
-            Log.e("YEONJAE", "사용자 정보 불러오기 실패: ${e.localizedMessage}")
+            Log.e("REVEIW_EDIT_ERROR", "사용자 정보 불러오기 실패: ${e.localizedMessage}")
         }
     }
 
@@ -226,10 +227,9 @@ class ReviewEditActivity : AppCompatActivity() {
 
         boothRef.update("photo_urls", FieldValue.arrayRemove(*deleteImageUrls.toTypedArray()))
             .addOnSuccessListener {
-                Log.d("YEONJAE", "이미지 URL 삭제 완료 및 업데이트: 삭제된 이미지 URL 리스트 - ${deleteImageUrls.joinToString(", ")}")
             }
             .addOnFailureListener { e ->
-                Log.e("YEONJAE", "이미지 URL 삭제 실패 및 업데이트 오류: ${e.localizedMessage}")
+                Log.e("REVEIW_EDIT_ERROR", "이미지 URL 삭제 실패 및 업데이트 오류: ${e.localizedMessage}")
             }
     }
 
@@ -267,7 +267,6 @@ class ReviewEditActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     showToast("이미지 업로드에 실패했습니다. 오류: ${e.message}")
-                    Log.e("YEONJAE", "이미지 업로드 실패: ${e.localizedMessage}")
                 }
             }
         }
@@ -298,8 +297,7 @@ class ReviewEditActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 .addOnFailureListener { e ->
-                    showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
-                    Log.e("YEONJAE", "리뷰 업데이트 실패: ${e.localizedMessage}")
+                    showToast("리뷰 업데이트에 실패했습니다: ${e.localizedMessage}")
                 }
         } else {
             showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")

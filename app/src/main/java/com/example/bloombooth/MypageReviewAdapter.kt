@@ -2,7 +2,6 @@ package com.example.bloombooth
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -127,7 +126,6 @@ class MypageReviewAdapter(private val context: Context, val reviewList: MutableL
 
         override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
             val imageUrl = photoUrls[position]
-            Log.d("BindCheck", "Binding item at position: $position with URL: $imageUrl")
             holder.bind(imageUrl)
         }
 
