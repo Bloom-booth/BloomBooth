@@ -26,6 +26,7 @@ import com.cloudinary.utils.ObjectUtils
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityReviewEditBinding
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +40,11 @@ class ReviewEditActivity : AppCompatActivity() {
     private lateinit var numbersList: List<Int>
     val db = Firebase.firestore
     private var imageList = mutableListOf<String>()
-    private lateinit var adapter: ImageAdapter
+    private var originImageUrls = mutableListOf<String>()
+    var deleteImageUrls = mutableListOf<String>()
+    private lateinit var adapter: ReviewEditImageAdapter
     private val newImages = mutableListOf<String>()
+
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -73,11 +77,11 @@ class ReviewEditActivity : AppCompatActivity() {
         val boothId = intent.getStringExtra("booth_id")
         val boothCnt = intent.getIntExtra("booth_cnt", 0)
         val accsCnt = intent.getIntExtra("accs_cnt", 0)
-        val imageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
+        originImageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
         val accsCondi = intent.getIntExtra("accs_condi", 0)
         val retouching = intent.getIntExtra("retouching", 0)
 
-        imageList  = imageUrls
+        imageList  = originImageUrls
         boothId?.let {
             fetchBoothName(it)
         }
@@ -183,6 +187,52 @@ class ReviewEditActivity : AppCompatActivity() {
     }
 
     private fun saveReview() {
+        val userId = FirebaseAuthManager.auth.currentUser?.uid ?: return userNullAction()
+        val boothId = intent.getStringExtra("booth_id") ?: return boothNullAction()
+        val reviewDate = DateFormatter.format(Date())
+        val reviewText = binding.reviewText.text.toString()
+        val rating = binding.ratingBar.rating.toInt()
+
+        val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") 0 else binding.toggleButton.text.toString().toIntOrNull() ?: 0
+        val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
+        val selectedAccsCondi = getSelectedRadioButtonId(binding.accsCondiRadioGroup)
+        val selectedRetouch = getSelectedRadioButtonId(binding.retouchRadioGroup)
+
+        val userRef = db.collection("user").document(userId)
+        userRef.get().addOnSuccessListener { documentSnapshot ->
+            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
+            val currentImageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
+            val updatedImageUrls = currentImageUrls.toMutableList().apply {
+                removeAll(deleteImageUrls)
+            }
+            updateReviewImages()
+            saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+
+            if (newImages.isNotEmpty()) {
+                uploadNewImages(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+            } else {
+                saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+            }
+
+        }.addOnFailureListener { e ->
+            showToast("사용자 정보를 불러오는 데 실패했습니다.")
+            Log.e("YEONJAE", "사용자 정보 불러오기 실패: ${e.localizedMessage}")
+        }
+    }
+
+    private fun updateReviewImages() {
+        val boothRef = db.collection("review").document(intent.getStringExtra("review_id")!!)
+
+        boothRef.update("photo_urls", FieldValue.arrayRemove(*deleteImageUrls.toTypedArray()))
+            .addOnSuccessListener {
+                Log.d("YEONJAE", "이미지 URL 삭제 완료 및 업데이트: 삭제된 이미지 URL 리스트 - ${deleteImageUrls.joinToString(", ")}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("YEONJAE", "이미지 URL 삭제 실패 및 업데이트 오류: ${e.localizedMessage}")
+            }
+    }
+
+    private fun uploadNewImages(updatedImageUrls: MutableList<String>, userName: String, reviewText: String, rating: Int, selectedBoothCount: Int, selectedAccsCnt: Int, selectedAccsCondi: Int, selectedRetouch: Int, boothId: String?, reviewDate: String) {
         val cloudinary = Cloudinary(
             ObjectUtils.asMap(
                 "cloud_name", getString(R.string.cloud_name),
@@ -190,156 +240,69 @@ class ReviewEditActivity : AppCompatActivity() {
                 "api_secret", getString(R.string.image_api_secret)
             )
         )
-        val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") {
-            0
-        } else {
-            binding.toggleButton.text.toString().toIntOrNull() ?: 0
-        }
 
-        val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
-        val selectedAccsCondi = getSelectedRadioButtonId(binding.accsCondiRadioGroup)
-        val selectedRetouch = getSelectedRadioButtonId(binding.retouchRadioGroup)
-        val reviewText = binding.reviewText.text.toString()
-        val rating = binding.ratingBar.rating.toInt()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val uploadedUrls = newImages.map { imageUri ->
+                    val uri = Uri.parse(imageUri)
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val fileName = "images/${UUID.randomUUID()}.jpg"
 
-        val userId = FirebaseAuthManager.auth.currentUser?.uid
-        if (userId == null) userNullAction()
-
-        val boothId = intent.getStringExtra("booth_id")
-        if (boothId == null) boothNullAction()
-
-        val reviewDate = DateFormatter.format(Date())
-
-        val userRef = db.collection("user").document(userId!!)
-        userRef.get().addOnSuccessListener { documentSnapshot ->
-            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
-            val currentImageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
-            val newImageUrls = mutableListOf<String>()
-            if (newImages.isNotEmpty()) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val uploadedUrls = newImages.map { imageUri ->
-                            val uri = Uri.parse(imageUri)
-                            val inputStream = contentResolver.openInputStream(uri)
-                            val fileName = "images/${UUID.randomUUID()}.jpg"
-
-                            inputStream?.use {
-                                val options = ObjectUtils.asMap(
-                                    "public_id", fileName,
-                                    "folder", "bloombooth"
-                                )
-                                val result = cloudinary.uploader().upload(it, options)
-                                result["url"].toString()
-                            } ?: throw Exception("Invalid input stream for URI: $imageUri")
-                        }
-
-                        newImageUrls.addAll(currentImageUrls)
-                        newImageUrls.addAll(uploadedUrls)
-
-                        withContext(Dispatchers.Main) {
-                            val reviewData = hashMapOf(
-                                "review_date" to reviewDate,
-                                "booth_cnt" to selectedBoothCount,
-                                "accs_condi" to selectedAccsCondi,
-                                "accs_cnt" to selectedAccsCnt,
-                                "retouching" to selectedRetouch,
-                                "review_text" to reviewText,
-                                "review_rating" to rating,
-                                "booth_id" to boothId,
-                                "user_id" to userId,
-                                "user_name" to userName,
-                                "photo_urls" to newImageUrls // 기존 + 새로 업로드한 URL을 합침
-                            )
-
-                            val reviewId = intent.getStringExtra("review_id")
-                            if (reviewId != null) {
-                                db.collection("review").document(reviewId)
-                                    .set(reviewData)
-                                    .addOnSuccessListener {
-                                        showToast("리뷰가 성공적으로 업데이트되었습니다.")
-                                        finish()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
-                                    }
-                            } else {
-                                showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")
-                            }
-                        }
-
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            showToast("이미지 업로드에 실패했습니다. 오류: ${e.message}")
-                        }
-                    }
+                    inputStream?.use {
+                        val options = ObjectUtils.asMap(
+                            "public_id", fileName,
+                            "folder", "bloombooth"
+                        )
+                        val result = cloudinary.uploader().upload(it, options)
+                        result["url"].toString()
+                    } ?: throw Exception("Invalid input stream for URI: $imageUri")
                 }
-            } else {
-                val reviewData = hashMapOf(
-                    "review_date" to reviewDate,
-                    "booth_cnt" to selectedBoothCount,
-                    "accs_condi" to selectedAccsCondi,
-                    "accs_cnt" to selectedAccsCnt,
-                    "retouching" to selectedRetouch,
-                    "review_text" to reviewText,
-                    "review_rating" to rating,
-                    "booth_id" to boothId,
-                    "user_id" to userId,
-                    "user_name" to userName,
-                    "photo_urls" to currentImageUrls
-                )
 
-                val reviewId = intent.getStringExtra("review_id")
-                if (reviewId != null) {
-                    db.collection("review").document(reviewId)
-                        .set(reviewData)
-                        .addOnSuccessListener {
-                            showToast("리뷰가 성공적으로 업데이트되었습니다.")
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
-                        }
-                } else {
-                    showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")
+                updatedImageUrls.addAll(uploadedUrls)
+                withContext(Dispatchers.Main) {
+                    saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToast("이미지 업로드에 실패했습니다. 오류: ${e.message}")
+                    Log.e("YEONJAE", "이미지 업로드 실패: ${e.localizedMessage}")
                 }
             }
-        }.addOnFailureListener { e ->
-            showToast("사용자 정보를 불러오는 데 실패했습니다.")
         }
     }
 
-//    private fun uploadImagesToCloudinary(
-//        imageUris: List<String>,
-//        onComplete: (List<String>) -> Unit
-//    ) {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                val urls = imageUris.map { imageUri ->
-//                    val uri = Uri.parse(imageUri)
-//                    val inputStream = contentResolver.openInputStream(uri)
-//                    val fileName = "images/${UUID.randomUUID()}.jpg"
-//
-//                    inputStream?.use {
-//                        val options = ObjectUtils.asMap(
-//                            "public_id", fileName,
-//                            "folder", "bloombooth"
-//                        )
-//                        val result = cloudinary.uploader().upload(it, options)
-//                        result["url"].toString()
-//                    } ?: throw Exception("Invalid input stream for URI: $imageUri")
-//                }
-//
-//                withContext(Dispatchers.Main) {
-//                    onComplete(urls)
-//                }
-//            } catch (e: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    showToast("이미지 업로드에 실패했습니다. 오류: ${e.message}")
-//                    Log.d("YEONJAE", e.message.toString())
-//                }
-//            }
-//        }
-//    }
+    private fun saveReviewData(updatedImageUrls: List<String>, userName: String, reviewText: String, rating: Int, selectedBoothCount: Int, selectedAccsCnt: Int, selectedAccsCondi: Int, selectedRetouch: Int, boothId: String?, reviewDate: String) {
+        val reviewData = hashMapOf(
+            "review_date" to reviewDate,
+            "booth_cnt" to selectedBoothCount,
+            "accs_condi" to selectedAccsCondi,
+            "accs_cnt" to selectedAccsCnt,
+            "retouching" to selectedRetouch,
+            "review_text" to reviewText,
+            "review_rating" to rating,
+            "booth_id" to boothId,
+            "user_id" to FirebaseAuthManager.auth.currentUser?.uid,
+            "user_name" to userName,
+            "photo_urls" to updatedImageUrls
+        )
+
+        val reviewId = intent.getStringExtra("review_id")
+        if (reviewId != null) {
+            db.collection("review").document(reviewId)
+                .set(reviewData)
+                .addOnSuccessListener {
+                    showToast("리뷰가 성공적으로 업데이트되었습니다.")
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
+                    Log.e("YEONJAE", "리뷰 업데이트 실패: ${e.localizedMessage}")
+                }
+        } else {
+            showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")
+        }
+    }
 
     private fun validateRating(): Boolean {
         val rating = binding.ratingBar.rating
@@ -396,10 +359,13 @@ class ReviewEditActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         val imageList = ArrayList<String>(intent.getStringArrayListExtra("photo_urls") ?: arrayListOf())
-        adapter = ImageAdapter(imageList, { position ->
-            imageList.removeAt(position)
-            adapter.notifyItemRemoved(position)
-        }, { _ -> })
+
+        originImageUrls = imageList
+
+        adapter = ReviewEditImageAdapter(
+            images = originImageUrls,
+            deletedImages = deleteImageUrls
+        )
         binding.imageThumbnailList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.imageThumbnailList.adapter = adapter
     }
