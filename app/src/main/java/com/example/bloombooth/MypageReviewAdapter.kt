@@ -16,7 +16,7 @@ import com.example.bloombooth.databinding.ItemMypageReviewBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-class MypageReviewAdapter(private val context: Context, private val reviewList: MutableList<ReviewItem>) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
+class MypageReviewAdapter(private val context: Context, val reviewList: MutableList<ReviewItem>) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
     private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
@@ -58,7 +58,6 @@ class MypageReviewAdapter(private val context: Context, private val reviewList: 
                     putExtra("review_id", review.review_id)
                     putExtra("review_text", review.review_text)
                     putExtra("review_rating", review.review_rating)
-                    putExtra("review_date", review.review_date)
                     putExtra("booth_id", review.booth_id)
                     putExtra("booth_cnt", review.booth_cnt)
                     putExtra("accs_cnt", review.accs_cnt)

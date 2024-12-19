@@ -1,5 +1,7 @@
 package com.example.bloombooth
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +12,7 @@ import com.example.bloombooth.databinding.ActivityMyReviewBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MyReviewActivity : AppCompatActivity() {
+    private val REVIEW_EDIT_REQUEST_CODE = 100
     private val binding: ActivityMyReviewBinding by lazy { ActivityMyReviewBinding.inflate(layoutInflater) }
     private val db = FirebaseFirestore.getInstance()
     private lateinit var mypageReviewAdapter: MypageReviewAdapter
@@ -75,6 +78,7 @@ class MyReviewActivity : AppCompatActivity() {
             }
     }
 
+
     private fun fetchReviewsByIds(reviewIds: List<String>) {
         if (reviewIds.isEmpty()) return
 
@@ -100,7 +104,6 @@ class MyReviewActivity : AppCompatActivity() {
 
                         val reviewId = document.id
                         fetchBoothName(boothId) { boothName ->
-                            // ReviewItem 객체로 데이터를 변환
                             val reviewItem = ReviewItem(
                                 review_date = reviewDateString,
                                 booth_cnt = boothCnt,

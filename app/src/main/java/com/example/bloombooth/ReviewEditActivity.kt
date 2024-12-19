@@ -2,8 +2,11 @@ package com.example.bloombooth
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,13 +16,23 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.cloudinary.Cloudinary
+import com.cloudinary.utils.ObjectUtils
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityReviewEditBinding
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Date
+import java.util.UUID
 
 class ReviewEditActivity : AppCompatActivity() {
     val binding: ActivityReviewEditBinding by lazy { ActivityReviewEditBinding.inflate(layoutInflater) }
@@ -28,22 +41,34 @@ class ReviewEditActivity : AppCompatActivity() {
     private val imageList = mutableListOf<String>()
     private lateinit var adapter: ImageAdapter
 
+
+    private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imageUri = result.data?.data
+            if (imageUri != null) {
+                if (imageList.size < 3) {
+                    imageList.add(imageUri.toString())
+                    adapter.notifyItemInserted(imageList.size - 1)
+                } else {
+                    showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
 
-        boothCntSetting()
         setupRecyclerView()
         defaultUISetting()
         boothCntSetting()
         addClickListeners()
         setupRadioButtons()
 
-        val reviewId = intent.getStringExtra("review_id")
         val reviewText = intent.getStringExtra("review_text")
         val reviewRating = intent.getIntExtra("review_rating", 0)
-        val reviewDate = intent.getStringExtra("review_date")
         val boothId = intent.getStringExtra("booth_id")
         val boothCnt = intent.getIntExtra("booth_cnt", 0)
         val accsCnt = intent.getIntExtra("accs_cnt", 0)
@@ -116,21 +141,160 @@ class ReviewEditActivity : AppCompatActivity() {
     }
 
     private fun boothCntSetting() {
-        // numbersList 초기화
         numbersList = (1..10).toList()
     }
 
-    private fun showNumberDialog() {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("부스 개수 선택")
-            .setItems(numbersList.map { it.toString() }.toTypedArray()) { _, which ->
-                val selectedNumber = numbersList[which]
-                binding.toggleButton.text = selectedNumber.toString()
-            }
-            .setNegativeButton("취소", null)
-            .create()
+    private fun addClickListeners() {
+        binding.reviewEditBackBtn.setOnClickListener {
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("리뷰 수정 취소")
+                .setMessage("정말로 취소하시겠습니까? 취소하시면 현재 작성한 내용은 반영되지 않습니다.")
+                .setPositiveButton("네") { _, _ ->
+                    finish()
+                }
+                .setNegativeButton("아니오", null)
+                .create()
+            dialog.show()
+        }
 
-        dialog.show()
+        binding.imageUploadBtn.setOnClickListener {
+            if (checkAndRequestPermission()) {
+                openGallery()
+            }
+        }
+
+        binding.uploadReviewBtn.setOnClickListener {
+            if (validateRating()) {
+                saveReview()
+            } else {
+                showToast("평점을 입력해 주세요.")
+            }
+        }
+
+        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                showNumberDialog()
+            } else {
+                binding.numbersRecyclerView.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun saveReview() {
+        val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") {
+            0
+        } else {
+            binding.toggleButton.text.toString().toIntOrNull() ?: 0
+        }
+
+        val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
+        val selectedAccsCondi = getSelectedRadioButtonId(binding.accsCondiRadioGroup)
+        val selectedRetouch = getSelectedRadioButtonId(binding.retouchRadioGroup)
+        val reviewText = binding.reviewText.text.toString()
+        val rating = binding.ratingBar.rating.toInt()
+
+        val userId = FirebaseAuthManager.auth.currentUser?.uid
+        if (userId == null) userNullAction()
+
+        val boothId = intent.getStringExtra("booth_id")
+        if (boothId == null) boothNullAction()
+
+        val reviewDate = DateFormatter.format(Date())
+
+        val userRef = db.collection("user").document(userId!!)
+        userRef.get().addOnSuccessListener { documentSnapshot ->
+            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
+
+            uploadImagesToCloudinary(imageList) { urls ->
+                val reviewData = hashMapOf(
+                    "review_date" to reviewDate,
+                    "booth_cnt" to selectedBoothCount,
+                    "accs_condi" to selectedAccsCondi,
+                    "accs_cnt" to selectedAccsCnt,
+                    "retouching" to selectedRetouch,
+                    "review_text" to reviewText,
+                    "review_rating" to rating,
+                    "booth_id" to boothId,
+                    "user_id" to userId,
+                    "user_name" to userName,
+                    "photo_urls" to urls
+                )
+
+                val reviewId = intent.getStringExtra("review_id")
+                if (reviewId != null) {
+                    db.collection("review").document(reviewId)
+                        .set(reviewData)
+                        .addOnSuccessListener {
+                            showToast("리뷰가 성공적으로 업데이트되었습니다.")
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
+                        }
+                } else {
+                    showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")
+                }
+            }
+        }.addOnFailureListener { e ->
+            showToast("사용자 정보를 불러오는 데 실패했습니다.")
+        }
+    }
+
+
+    private fun uploadImagesToCloudinary(
+        imageUris: List<String>,
+        onComplete: (List<String>) -> Unit
+    ) {
+        val cloudinary = Cloudinary(
+            ObjectUtils.asMap(
+                "cloud_name", getString(R.string.cloud_name),
+                "api_key", getString(R.string.image_api_key),
+                "api_secret", getString(R.string.image_api_secret)
+            )
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val urls = imageUris.map { imageUri ->
+                    val inputStream = contentResolver.openInputStream(Uri.parse(imageUri))
+                    val fileName = "images/${UUID.randomUUID()}.jpg"
+
+                    inputStream?.use {
+                        val options = ObjectUtils.asMap(
+                            "public_id", fileName,
+                            "folder", "bloombooth"
+                        )
+                        val result = cloudinary.uploader().upload(it, options)
+                        result["url"].toString()
+                    } ?: throw Exception("Invalid input stream for URI: $imageUri")
+                }
+
+                withContext(Dispatchers.Main) {
+                    onComplete(urls)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToast("이미지 업로드 중 오류가 발생했습니다: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun validateRating(): Boolean {
+        val rating = binding.ratingBar.rating
+        return rating > 0
+    }
+
+    private fun boothNullAction() {
+        showToast("해당 부스가 존재하지 않습니다.")
+        startActivity(Intent(this, SplashActivity::class.java))
+        finish()
+    }
+
+    private fun userNullAction() {
+        showToast("로그인이 필요합니다.")
+        startActivity(Intent(this, SplashActivity::class.java))
+        finish()
     }
 
     private fun getSelectedRadioButtonId(radioGroup: RadioGroup): Int {
@@ -149,52 +313,17 @@ class ReviewEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun addClickListeners() {
-        binding.reviewEditBackBtn.setOnClickListener {
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("리뷰 수정 취소")
-                .setMessage("정말로 취소하시겠습니까? 취소하시면 현재 작성한 내용은 반영되지 않습니다.")
-                .setPositiveButton("네") { _, _ ->
-                    finish()
-                }
-                .setNegativeButton("아니오", null)
-                .create()
-            dialog.show()
-        }
-
-        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                showNumberDialog()
-            } else {
-                binding.numbersRecyclerView.visibility = View.GONE
+    private fun showNumberDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("부스 개수 선택")
+            .setItems(numbersList.map { it.toString() }.toTypedArray()) { _, which ->
+                val selectedNumber = numbersList[which]
+                binding.toggleButton.text = selectedNumber.toString()
             }
-        }
+            .setNegativeButton("취소", null)
+            .create()
 
-        binding.imageUploadBtn.setOnClickListener {
-            if (checkAndRequestPermission()) {
-                openGallery()
-            }
-        }
-
-        binding.uploadReviewBtn.setOnClickListener {
-            if (validateRating()) {
-                saveReview()
-            } else {
-                showToast("평점을 입력해 주세요.")
-            }
-        }
-    }
-
-    private fun openGallery() {
-        TODO("Not yet implemented")
-    }
-
-    private fun validateRating(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    private fun saveReview() {
-        TODO("Not yet implemented")
+        dialog.show()
     }
 
     private fun defaultUISetting() {
@@ -210,12 +339,9 @@ class ReviewEditActivity : AppCompatActivity() {
             imageList.removeAt(position)
             adapter.notifyItemRemoved(position)
         }, { _ -> })
-
-        // RecyclerView 설정
         binding.imageThumbnailList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.imageThumbnailList.adapter = adapter
     }
-
 
     private fun checkAndRequestPermission(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -238,6 +364,13 @@ class ReviewEditActivity : AppCompatActivity() {
             }
         }
         return true
+    }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+        }
+        imagePickerResult.launch(intent)
     }
 
     private fun showToast(message: String) {
