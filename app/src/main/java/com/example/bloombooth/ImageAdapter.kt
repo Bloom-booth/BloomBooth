@@ -7,25 +7,33 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.bloombooth.databinding.ItemImageThumbnailBinding
 
-class ImageAdapter(
-    private val images: MutableList<String>,
+open class ImageAdapter(
+    open val images: MutableList<String>,
     private val onDeleteClick: (Int) -> Unit,
     private val onImageClick: (String) -> Unit
 ) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+    open fun addImage(newImageUrl: String) {
+        images.add(newImageUrl)
+        notifyItemInserted(images.size - 1)
+    }
 
-    inner class ImageViewHolder(private val binding: ItemImageThumbnailBinding) :
+
+    inner class ImageViewHolder(val binding: ItemImageThumbnailBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
         fun bind(imagePath: String, position: Int) {
+            val secureImageUrl = if (imagePath.startsWith("http://")) {
+                imagePath.replace("http://", "https://")
+            } else {
+                imagePath
+            }
+
             Glide.with(binding.root.context)
-                .load(imagePath)
+                .load(secureImageUrl)
                 .placeholder(R.drawable.loading_image)
                 .error(R.drawable.error_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(binding.imageThumbnail)
-
-            binding.imageThumbnail.setOnClickListener {
-                onImageClick(imagePath)
-            }
 
             binding.deleteButton.setOnClickListener {
                 it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {

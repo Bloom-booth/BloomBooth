@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMypageBinding
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MypageActivity : AppCompatActivity() {
@@ -35,6 +36,11 @@ class MypageActivity : AppCompatActivity() {
 
         binding.homeBtn.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.reviewBtn.setOnClickListener {
+            val intent = Intent(this, MyReviewActivity::class.java)
             startActivity(intent)
         }
 

@@ -26,6 +26,7 @@ import java.util.Date
 import com.cloudinary.Cloudinary
 import kotlinx.coroutines.*
 import com.cloudinary.utils.ObjectUtils
+import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -119,31 +120,51 @@ class ReviewActivity : AppCompatActivity() {
 
         val reviewDate = DateFormatter.format(Date())
 
-        uploadImagesToCloudinary(imageList) { urls ->
-            val reviewData = hashMapOf(
-                "review_date" to reviewDate,
-                "booth_cnt" to selectedBoothCount,
-                "accs_condi" to selectedAccsCondi,
-                "accs_cnt" to selectedAccsCnt,
-                "retouching" to selectedRetouch,
-                "review_text" to reviewText,
-                "review_rating" to rating,
-                "booth_id" to boothId,
-                "user_id" to userId,
-                "photo_urls" to urls
-            )
+        val userRef = db.collection("user").document(userId!!)
+        userRef.get().addOnSuccessListener { documentSnapshot ->
+            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
 
-            db.collection("review")
-                .add(reviewData)
-                .addOnSuccessListener {
-                    showToast("리뷰가 성공적으로 등록되었습니다.")
-                    finish()
-                }
-                .addOnFailureListener { e ->
-                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-                }
+            uploadImagesToCloudinary(imageList) { urls ->
+                val reviewData = hashMapOf(
+                    "review_date" to reviewDate,
+                    "booth_cnt" to selectedBoothCount,
+                    "accs_condi" to selectedAccsCondi,
+                    "accs_cnt" to selectedAccsCnt,
+                    "retouching" to selectedRetouch,
+                    "review_text" to reviewText,
+                    "review_rating" to rating,
+                    "booth_id" to boothId,
+                    "user_id" to userId,
+                    "user_name" to userName,
+                    "photo_urls" to urls
+                )
+
+                db.collection("review")
+                    .add(reviewData)
+                    .addOnSuccessListener { documentReference ->
+                        val reviewId = documentReference.id
+
+                        if (userId != null) {
+                            db.collection("user").document(userId)
+                                .update("review_ids", FieldValue.arrayUnion(reviewId))
+                                .addOnSuccessListener {
+                                    showToast("리뷰가 성공적으로 등록되었습니다.")
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                                }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                    }
+            }
+        }.addOnFailureListener { e ->
+            showToast("사용자 정보를 불러오는 데 실패했습니다.")
         }
     }
+
 
     private fun uploadImagesToCloudinary(
         imageUris: List<String>,
@@ -184,7 +205,6 @@ class ReviewActivity : AppCompatActivity() {
         }
     }
 
-
     private fun validateRating(): Boolean {
         val rating = binding.ratingBar.rating
         return rating > 0
@@ -217,7 +237,6 @@ class ReviewActivity : AppCompatActivity() {
             else -> 0 
         }
     }
-
 
     private fun showNumberDialog() {
         val dialog = AlertDialog.Builder(this)

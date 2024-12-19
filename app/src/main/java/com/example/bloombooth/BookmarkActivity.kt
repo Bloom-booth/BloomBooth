@@ -81,13 +81,16 @@ class BookmarkActivity : AppCompatActivity() {
                 val bookmarks = document.get("bookmark") as List<Map<String, String>>
                 bookmarkList.clear()
 
-                for (bookmark in bookmarks) {
-                    val id = bookmark["id"] ?: ""
-                    val name = bookmark["name"] ?: ""
-                    val isBookmarked = true
-                    bookmarkList.add(BookmarkItem(id, name, isBookmarked))
+                if (bookmarks.isEmpty()) {
+                    Toast.makeText(this, "북마크한 가게가 없습니다!", Toast.LENGTH_SHORT).show()
+                } else {
+                    for (bookmark in bookmarks) {
+                        val id = bookmark["id"] ?: ""
+                        val name = bookmark["name"] ?: ""
+                        val isBookmarked = true
+                        bookmarkList.add(BookmarkItem(id, name, isBookmarked))
+                    }
                 }
-
                 bookmarkAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { e ->

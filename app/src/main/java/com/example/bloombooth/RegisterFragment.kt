@@ -196,12 +196,12 @@ class RegisterFragment : Fragment() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     user?.let {
-                        // 사용자 데이터를 저장할 Map
                         val userData = hashMapOf(
                             "nickname" to nickname,
                             "email" to email,
+                            "user_id" to it.uid,
                             "bookmark" to mutableListOf<Map<String, String>>(),
-                            "reviewIds" to mutableListOf<String>()
+                            "review_ids" to mutableListOf<String>()
                         )
 
                         val db = FirebaseFirestore.getInstance()
@@ -233,6 +233,7 @@ class RegisterFragment : Fragment() {
                 }
             }
     }
+
 
 
     private fun navigateToLoginFragment() {
