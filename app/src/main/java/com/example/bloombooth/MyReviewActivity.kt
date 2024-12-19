@@ -153,6 +153,11 @@ class MyReviewActivity : AppCompatActivity() {
         }
     }
 
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+
     private fun updateUIWithReviews(fetchedReviews: MutableList<ReviewItem>) {
         setupRecyclerView(fetchedReviews)
     }
