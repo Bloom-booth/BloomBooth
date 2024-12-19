@@ -53,6 +53,7 @@ class ReviewEditActivity : AppCompatActivity() {
                 if (newImages.size < 3) {
                     newImages.clear()
                     newImages.add(imageUri.toString())
+                    adapter.addNewImage(imageUri.toString())
                     adapter.notifyDataSetChanged()
                 } else {
                     showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")

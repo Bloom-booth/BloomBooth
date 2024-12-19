@@ -12,6 +12,11 @@ open class ImageAdapter(
     private val onDeleteClick: (Int) -> Unit,
     private val onImageClick: (String) -> Unit
 ) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+    open fun addImage(newImageUrl: String) {
+        images.add(newImageUrl)
+        notifyItemInserted(images.size - 1)
+    }
+
 
     inner class ImageViewHolder(val binding: ItemImageThumbnailBinding) :
         RecyclerView.ViewHolder(binding.root) {
