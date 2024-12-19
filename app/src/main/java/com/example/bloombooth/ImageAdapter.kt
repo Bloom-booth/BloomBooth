@@ -7,13 +7,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.bloombooth.databinding.ItemImageThumbnailBinding
 
-class ImageAdapter(
-    private val images: MutableList<String>,
+open class ImageAdapter(
+    open val images: MutableList<String>,
     private val onDeleteClick: (Int) -> Unit,
     private val onImageClick: (String) -> Unit
 ) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
-    inner class ImageViewHolder(private val binding: ItemImageThumbnailBinding) :
+    inner class ImageViewHolder(val binding: ItemImageThumbnailBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(imagePath: String, position: Int) {
