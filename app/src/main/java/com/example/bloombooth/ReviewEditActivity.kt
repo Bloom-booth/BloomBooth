@@ -294,7 +294,8 @@ class ReviewEditActivity : AppCompatActivity() {
                 .set(reviewData)
                 .addOnSuccessListener {
                     showToast("리뷰가 성공적으로 업데이트되었습니다.")
-                    finish()
+                    val intent = Intent(this, MyReviewActivity::class.java)
+                    startActivity(intent)
                 }
                 .addOnFailureListener { e ->
                     showToast("리뷰 업데이트에 실패했습니다. 다시 시도해주세요.")
