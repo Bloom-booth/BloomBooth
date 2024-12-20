@@ -59,6 +59,11 @@ dependencies {
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.runner)
     implementation(libs.androidx.espresso.intents)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.places)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,6 +75,9 @@ dependencies {
     androidTestImplementation(libs.mockito)
 
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-firestore:24.0.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     // implementation("com.google.firebase:firebase-analytics")

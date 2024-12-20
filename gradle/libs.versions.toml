@@ -19,6 +19,8 @@ junitKtx = "1.2.1"
 mockitoAndroid = "4.11.0"
 runner = "1.6.2"
 espressoIntents = "3.6.1"
+lifecycleViewmodelKtx = "2.6.2"
+places = "4.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +40,8 @@ androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoIntents" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
