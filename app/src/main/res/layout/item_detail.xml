@@ -1,97 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--activity_detail.xml-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="30dp"
-    android:background="@color/white"
-    android:orientation="vertical">
-    <include
-        android:id="@+id/header"
-        layout="@layout/header_default"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"/>
-    <!--boothName, ic_bookmark-->
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/white_background_round"
+    android:padding="10dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
+    <!--userName, reviewRating, reviewDate-->
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-        <ImageView
-            android:id="@+id/ic_back"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:contentDescription="back"
-            android:src="@drawable/ic_back"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        tools:ignore="MissingConstraints">
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0">
+            app:layout_constraintTop_toTopOf="parent" >
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_flower" />
             <TextView
-                android:id="@+id/boothName"
+                android:id="@+id/userName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Booth Name"
-                android:textSize="24sp"/>
-            <ImageView
-                android:id="@+id/ic_bookmark"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@drawable/ic_yellow_flower"/>
+                android:text="청파동춘식이"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/reviewRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/dark_pink" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/5"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/dark_pink" />
         </LinearLayout>
+        <TextView
+            android:id="@+id/reviewDate"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="2024.01.01"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--boothAddr, boothInfo, boothContact-->
-    <LinearLayout
-        android:background="@drawable/background_round"
+    <!--reviewText-->
+    <TextView
+        android:id="@+id/reviewText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="20dp"
-        android:padding="10dp">
-
-        <TextView
-            android:id="@+id/boothAddr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Booth Address"
-            android:textSize="16sp" />
-        <TextView
-            android:id="@+id/boothInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Booth Info"
-            android:textSize="16sp" />
-        <TextView
-            android:id="@+id/boothContact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Booth Contact"
-            android:textSize="16sp" />
-
-    </LinearLayout>
-    <!--boothCnt, accsCondi, accsCnt, retouching, reviewAvg-->
+        android:layout_marginTop="10dp"
+        android:text="이것은 부스 리뷰의 내용입니다. 이것은 부스 리뷰의 내용입니다.이것은 부스 리뷰의 내용입니다."
+        android:textSize="16sp" />
+    <!--boothCnt, retouching, accsCondi, accsCnt-->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reviewFrame"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:background="@drawable/background_round"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:padding="10dp">
+        android:layout_marginTop="10dp">
         <LinearLayout
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_width="180dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <LinearLayout
@@ -100,7 +92,7 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="5dp">
                 <TextView
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="부스 개수"
                     android:textSize="16sp"
@@ -122,10 +114,42 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="보정"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/retouching"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:text="미정"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@drawable/dark_background_round"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="5dp">
                 <TextView
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="악세서리 상태"
                     android:textSize="16sp"
@@ -150,7 +174,7 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="5dp">
                 <TextView
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="악세서리 개수"
                     android:textSize="16sp"
@@ -169,97 +193,39 @@
                     android:textColor="@color/white"
                     android:background="@drawable/dark_background_round"/>
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="보정"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:id="@+id/retouching"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="3dp"
-                    android:paddingBottom="3dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:text="미정"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:background="@drawable/dark_background_round"/>
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/reviewAvg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/dark_pink"
-                android:textSize="50sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:text="/5"
-                android:textSize="50sp"
-                android:textStyle="bold"
-                android:textColor="@color/dark_pink" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--writeReview-->
+    <!--pic1, pic2, pic3-->
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" >
-        <TextView
-            android:text="In Bloom Review"
-            android:textSize="25sp"
-            android:fontFamily="@font/main_font"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+        <ImageView
+            android:id="@+id/pic1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-        <TextView
-            android:id="@+id/writeReview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="리뷰 작성하기"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:background="@drawable/dark_background_round" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_flower" />
+        <ImageView
+            android:id="@+id/pic2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_flower" />
+        <ImageView
+            android:id="@+id/pic3"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_flower" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--boothReview-->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/boothReview"
-        android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="30dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:background="@drawable/background_round"/>
 </LinearLayout>

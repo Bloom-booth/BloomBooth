@@ -24,6 +24,8 @@ playServicesLocation = "21.3.0"
 playServicesMaps = "19.0.0"
 runner = "1.6.2"
 espressoIntents = "3.6.1"
+lifecycleViewmodelKtx = "2.6.2"
+places = "4.1.0"
 recyclerview = "1.3.2"
 runnerVersion = "1.5.2"
 
@@ -48,6 +50,8 @@ androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoIntents" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
