@@ -17,7 +17,15 @@ class BoothReviewAdapter : RecyclerView.Adapter<BoothReviewAdapter.ReviewViewHol
             binding.userName.text = review.user_name
             binding.reviewRating.text = review.review_rating.toString()
             binding.reviewDate.text = review.review_date
-            binding.reviewText.text = review.review_text
+
+            binding.reviewText.apply {
+                if (review.review_text.isNullOrEmpty()) {
+                    visibility = View.GONE
+                } else {
+                    text = review.review_text
+                    visibility = View.VISIBLE
+                }
+            }
 
             // 4개의 항목을 전부 입력하지 않았으면 사라지게 한다.
             if (review.booth_cnt == 0 && review.accs_condi == 0 && review.accs_cnt == 0 && review.retouching == 0) {
