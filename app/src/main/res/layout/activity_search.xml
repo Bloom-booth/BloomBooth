@@ -80,7 +80,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCnt2"
             android:layout_width="80dp"
@@ -91,7 +91,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCnt3"
             android:layout_width="80dp"
@@ -102,7 +102,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCnt4"
             android:layout_width="80dp"
@@ -112,7 +112,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
     </LinearLayout>
     <!-- accsCondi -->
     <TextView
@@ -138,7 +138,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCondi2"
             android:layout_width="80dp"
@@ -149,7 +149,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCondi3"
             android:layout_width="80dp"
@@ -160,7 +160,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/accsCondi4"
             android:layout_width="80dp"
@@ -170,7 +170,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
     </LinearLayout>
     <!-- retouching -->
     <TextView
@@ -196,7 +196,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/retouching2"
             android:layout_width="80dp"
@@ -207,7 +207,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/retouching3"
             android:layout_width="80dp"
@@ -218,7 +218,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
         <TextView
             android:id="@+id/retouching4"
             android:layout_width="80dp"
@@ -228,7 +228,7 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:gravity="center"
-            android:background="@drawable/background_round" />
+            android:background="@drawable/bg_light_pink" />
     </LinearLayout>
     <TextView
         android:id="@+id/btn_search"
@@ -236,7 +236,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp"
-        android:background="@drawable/dark_background_round"
+        android:background="@drawable/bg_dark_pink"
         android:gravity="center"
         android:text="검색하기"
         android:textSize="20sp"

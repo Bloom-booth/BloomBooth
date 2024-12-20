@@ -18,8 +18,6 @@ class MyReviewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         setContentView(binding.root)
 
         val user = FirebaseAuthManager.auth.currentUser
@@ -29,8 +27,9 @@ class MyReviewActivity : AppCompatActivity() {
         } else {
             binding.username.text = "사용자의 닉네임"
         }
-
-        binding.myreviewBackBtn.setOnClickListener {
+        
+        // 뒤로가기
+        binding.header.btnBack.setOnClickListener {
             finish()
         }
     }
@@ -156,7 +155,6 @@ class MyReviewActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
 
     private fun updateUIWithReviews(fetchedReviews: MutableList<ReviewItem>) {
         setupRecyclerView(fetchedReviews)

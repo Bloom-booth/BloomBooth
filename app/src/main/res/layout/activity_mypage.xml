@@ -1,120 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".MypageActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:backgroundTint="@color/white">
-    
-    <LinearLayout
+    android:padding="30dp"
+    android:background="@color/white" >
+
+    <include
+        android:id="@+id/header"
+        layout="@layout/header_mypage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <include
-            layout="@layout/header_mypage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <ImageView
-            android:id="@+id/home_btn"
+        android:layout_marginTop="30dp"
+        android:text="안녕하세요!"
+        android:textSize="24sp" />
+    <!--username-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="70dp"
-            android:backgroundTint="@color/white"
-            android:contentDescription="go to home"
-            android:scaleType="center"
-            android:src="@drawable/home_button" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="40dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/user_meet_part"
-        android:orientation="vertical"
-        android:backgroundTint="@color/white">
-
+            android:text="청파동춘식이"
+            android:textSize="30sp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="안녕하세요!"
-            android:backgroundTint="@color/white"
-            android:textSize="24sp"/>
-
-        <LinearLayout
-            android:backgroundTint="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/username"
-                android:backgroundTint="@color/white"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:text=""/>
-
-            <TextView
-                android:layout_marginLeft="15dp"
-                android:textSize="30sp"
-                android:backgroundTint="@color/white"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="님"/>
-        </LinearLayout>
+            android:text=" 님"
+            android:textSize="30sp"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_marginLeft="30dp"
-        android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:backgroundTint="@color/white"
-        android:layout_height="wrap_content">
+    <!--btn_update_info-->
+    <TextView
+        android:id="@+id/btn_update_info"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_dark_pink"
+        android:gravity="center"
+        android:text="개인정보 수정하기"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
+    <!--btn_my_review-->
+    <TextView
+        android:id="@+id/btn_my_review"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_dark_pink"
+        android:gravity="center"
+        android:text="내 리뷰"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
+    <!--btn_my_bookmark-->
+    <TextView
+        android:id="@+id/btn_my_bookmark"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_dark_pink"
+        android:gravity="center"
+        android:text="북마크"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
 
-        <Button
-            android:id="@+id/update_userinfo_btn"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="개인정보 수정하기" />
-
-        <Button
-            android:id="@+id/review_btn"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="내 리뷰" />
-
-        <Button
-            android:id="@+id/bookmark_btn"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:text="북마크" />
-
-        <Button
-            android:id="@+id/logout_btn"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/main_button"
-            android:textColor="@color/black"
-            android:text="로그아웃" />
-
-
-        <Button
-            android:id="@+id/withdraw_btn"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:background="@drawable/main_button"
-            android:textColor="@color/black"
-            android:text="탈퇴하기" />
-
-    </LinearLayout>
+    <!--btn_logout-->
+    <TextView
+        android:id="@+id/btn_logout"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/bg_light_gray"
+        android:gravity="center"
+        android:text="로그아웃"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+    <!--btn_withdrawal-->
+    <TextView
+        android:id="@+id/btn_withdrawal"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_light_gray"
+        android:gravity="center"
+        android:text="탈퇴하기"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
 
 </LinearLayout>

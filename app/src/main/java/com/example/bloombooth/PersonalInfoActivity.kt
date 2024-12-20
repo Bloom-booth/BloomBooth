@@ -19,7 +19,6 @@ class PersonalInfoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.root)
 
         val user = auth.currentUser
@@ -30,7 +29,7 @@ class PersonalInfoActivity : AppCompatActivity() {
             binding.email.text = "이메일이 존재하지 않습니다."
         }
 
-        binding.personalinfoBackBtn.setOnClickListener {
+        binding.header.btnBack.setOnClickListener {
             finish()
         }
 

@@ -61,7 +61,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // MypageActivity로 이동하기
         binding.header.btnMypage.setOnClickListener {
-
+            val intent = Intent(this, MypageActivity::class.java)
+            startActivity(intent)
         }
     }
 

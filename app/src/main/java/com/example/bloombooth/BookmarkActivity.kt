@@ -19,7 +19,6 @@ class BookmarkActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.root)
 
         val user = FirebaseAuthManager.auth.currentUser
@@ -28,9 +27,11 @@ class BookmarkActivity : AppCompatActivity() {
         } else {
             binding.username.text = "사용자의 닉네임"
         }
-
+        
         val userId = FirebaseAuthManager.auth.currentUser?.uid ?: return
-        binding.bookmarkBackBtn.setOnClickListener {
+        
+        // 뒤로 가기
+        binding.header.btnBack.setOnClickListener {
             finish()
         }
 
@@ -78,15 +79,17 @@ class BookmarkActivity : AppCompatActivity() {
         db.collection("user").document(userId)
             .get()
             .addOnSuccessListener { document ->
-                val bookmarks = document.get("bookmark") as List<Map<String, String>>
+                val bookmarks = document.get("bookmark") as? List<String> ?: emptyList()
+
                 bookmarkList.clear()
 
                 if (bookmarks.isEmpty()) {
                     Toast.makeText(this, "북마크한 가게가 없습니다!", Toast.LENGTH_SHORT).show()
                 } else {
                     for (bookmark in bookmarks) {
-                        val id = bookmark["id"] ?: ""
-                        val name = bookmark["name"] ?: ""
+                        // 각 문자열을 필요한 데이터로 처리 (예: id와 name 분리)
+                        val id = bookmark  // 예를 들어, id로 사용할 경우
+                        val name = bookmark  // 또는 다른 방식으로 처리
                         val isBookmarked = true
                         bookmarkList.add(BookmarkItem(id, name, isBookmarked))
                     }
@@ -97,6 +100,7 @@ class BookmarkActivity : AppCompatActivity() {
                 Toast.makeText(this, "북마크 데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun addBookmarkToDb(item: BookmarkItem) {
         val userId = FirebaseAuthManager.auth.currentUser?.uid ?: return

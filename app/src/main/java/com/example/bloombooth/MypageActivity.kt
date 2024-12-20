@@ -3,12 +3,9 @@ package com.example.bloombooth
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityMypageBinding
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MypageActivity : AppCompatActivity() {
@@ -18,14 +15,7 @@ class MypageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.root)
-
-        binding.reviewBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
-        binding.updateUserinfoBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
-        binding.bookmarkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
-        binding.logoutBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
-        binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
 
         val user = FirebaseAuthManager.auth.currentUser
         if (user != null) {
@@ -34,36 +24,37 @@ class MypageActivity : AppCompatActivity() {
             binding.username.text = "사용자의 닉네임"
         }
 
-        binding.homeBtn.setOnClickListener {
+        // 메인 화면으로
+        binding.header.homeBtn.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-
-        binding.reviewBtn.setOnClickListener {
-            val intent = Intent(this, MyReviewActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.updateUserinfoBtn.setOnClickListener {
+        // 개인정보 수정하기
+        binding.btnUpdateInfo.setOnClickListener {
             val intent = Intent(this, PersonalInfoActivity::class.java)
             startActivity(intent)
         }
-
-        binding.bookmarkBtn.setOnClickListener {
+        // 내 리뷰
+        binding.btnMyReview.setOnClickListener {
+            val intent = Intent(this, MyReviewActivity::class.java)
+            startActivity(intent)
+        }
+        // 북마크
+        binding.btnMyBookmark.setOnClickListener {
             val intent = Intent(this, BookmarkActivity::class.java)
             startActivity(intent)
         }
-
-        binding.withdrawBtn.setOnClickListener {
+        // 로그아웃
+        binding.btnLogout.setOnClickListener() {
+            logoutAndGotoSplash();
+        }
+        // 탈퇴하기
+        binding.btnWithdrawal.setOnClickListener {
             val intent = Intent(this, WithdrawalActivity::class.java)
             startActivity(intent)
         }
-
-        binding.logoutBtn.setOnClickListener() {
-            logoutAndGotoSplash();
-        }
     }
-
+    // 사용자 정보 불러오기
     private fun fetchUserData(userId: String) {
         db.collection("user").document(userId)
             .get()
@@ -79,7 +70,7 @@ class MypageActivity : AppCompatActivity() {
                 Toast.makeText(this, "데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
+    // 로그아웃하고 스플래시로 이동하기
     private fun logoutAndGotoSplash() {
         auth.signOut()
         val intent = Intent(this, SplashActivity::class.java)

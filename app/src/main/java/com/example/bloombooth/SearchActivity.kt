@@ -3,15 +3,11 @@
 package com.example.bloombooth
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.example.bloombooth.databinding.ActivitySearchBinding
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
@@ -91,17 +87,17 @@ class SearchActivity : AppCompatActivity() {
             textView.setOnClickListener {
                 if (lastSelectedIndex == index) {
                     // 이미 선택된 것을 다시 클릭한 경우 선택 해제
-                    textViews[index].setBackgroundResource(R.drawable.background_round) // 기본 배경
+                    textViews[index].setBackgroundResource(R.drawable.bg_light_pink) // 기본 배경
                     textViews[index].setTextColor(resources.getColor(R.color.black, null)) // 기본 텍스트 색
                     lastSelectedIndex = null // 선택 해제
                     onSelect(0) // 값 초기화
                 } else {
                     // 다른 항목 선택
                     textViews.forEach {
-                        it.setBackgroundResource(R.drawable.background_round) // 기본 배경
+                        it.setBackgroundResource(R.drawable.bg_light_pink) // 기본 배경
                         it.setTextColor(resources.getColor(R.color.black, null)) // 기본 텍스트 색
                     }
-                    textView.setBackgroundResource(R.drawable.dark_background_round) // 선택된 배경
+                    textView.setBackgroundResource(R.drawable.bg_dark_pink) // 선택된 배경
                     textView.setTextColor(resources.getColor(R.color.white, null)) // 선택된 텍스트 색
                     lastSelectedIndex = index // 현재 선택 항목 업데이트
                     onSelect(index + 1) // 선택된 값 전달
