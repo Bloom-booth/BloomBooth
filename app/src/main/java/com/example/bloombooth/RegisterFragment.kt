@@ -198,7 +198,10 @@ class RegisterFragment : Fragment() {
                     user?.let {
                         val userData = hashMapOf(
                             "nickname" to nickname,
-                            "email" to email
+                            "email" to email,
+                            "user_id" to it.uid,
+                            "bookmark" to mutableListOf<Map<String, String>>(),
+                            "review_ids" to mutableListOf<String>()
                         )
 
                         val db = FirebaseFirestore.getInstance()
@@ -230,6 +233,8 @@ class RegisterFragment : Fragment() {
                 }
             }
     }
+
+
 
     private fun navigateToLoginFragment() {
         parentFragmentManager.beginTransaction()
