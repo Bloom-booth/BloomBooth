@@ -5,9 +5,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.bloombooth.auth.FirebaseAuthManager
@@ -15,11 +13,11 @@ import com.example.bloombooth.databinding.ItemMypageReviewBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-class MypageReviewAdapter(private val context: Context, val reviewList: MutableList<ReviewItem>) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
+class MypageReviewAdapter(private val context: Context, val reviewList: MutableList<Review>) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
     private val db = FirebaseFirestore.getInstance()
 
     inner class ReviewViewHolder(private val binding: ItemMypageReviewBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(review: ReviewItem) {
+        fun bind(review: Review) {
             binding.boothName.text = review.booth_name
 
             binding.userName.text = review.user_name
@@ -83,10 +81,14 @@ class MypageReviewAdapter(private val context: Context, val reviewList: MutableL
             // 수정하기
             binding.reviewEdit.setOnClickListener {
                 val intent = Intent(context, ReviewEditActivity::class.java).apply {
+                    putExtra("review_date", review.review_date)
                     putExtra("review_id", review.review_id)
                     putExtra("review_text", review.review_text)
                     putExtra("review_rating", review.review_rating)
                     putExtra("booth_id", review.booth_id)
+                    putExtra("booth_name", review.booth_name)
+                    putExtra("user_id", review.user_id)
+                    putExtra("user_name", review.user_name)
                     putExtra("booth_cnt", review.booth_cnt)
                     putExtra("accs_cnt", review.accs_cnt)
                     putStringArrayListExtra("photo_urls", ArrayList(review.photo_urls))
@@ -116,7 +118,7 @@ class MypageReviewAdapter(private val context: Context, val reviewList: MutableL
         return reviewList.size
     }
 
-    private fun deleteReview(review: ReviewItem) {
+    private fun deleteReview(review: Review) {
         val reviewId = review.review_id
         val userId = FirebaseAuthManager.auth.currentUser?.uid
         if (userId != null) {

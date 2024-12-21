@@ -1,25 +1,43 @@
 package com.example.bloombooth
 
-import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
+import Booth
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ItemUserBookmarkBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MypageBookmarkAdapter(
-    private val items: MutableList<BookmarkItem>,
-    private val onHeartClick: (Int, Boolean) -> Unit,
-    private val db: FirebaseFirestore,
-    private val userId: String
+    private val onItemClick: (Booth) -> Unit
 ) : RecyclerView.Adapter<MypageBookmarkAdapter.BookmarkViewHolder>() {
 
-    class BookmarkViewHolder(val binding: ItemUserBookmarkBinding) : RecyclerView.ViewHolder(binding.root)
+    private var bookmarkList: List<Booth> = listOf()
+
+    // ViewHolder 정의
+    inner class BookmarkViewHolder(val binding: ItemUserBookmarkBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(booth: Booth) {
+            // 부스 이름
+            binding.boothName.text = booth.booth_name
+
+            // 평점 및 리뷰 수
+            binding.ratingAvg.text = booth.review_avg.toString() // 평점 (숫자)
+            binding.ratingStar.rating = booth.review_avg.toFloat() // 평점 (별)
+            binding.reviewCnt.text = booth.review_cnt.toString() // 리뷰 수
+
+            // 북마크 아이콘 클릭 리스너
+            binding.icBookmark.setOnClickListener {
+                booth.booth_id?.let { it1 -> toggleBookmarkStatus(it1, binding) }
+            }
+
+            // 부스 이름을 클릭하면
+            binding.boothArea.setOnClickListener {
+                onItemClick(booth)
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookmarkViewHolder {
         val binding = ItemUserBookmarkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -27,86 +45,55 @@ class MypageBookmarkAdapter(
     }
 
     override fun onBindViewHolder(holder: BookmarkViewHolder, position: Int) {
-        val item = items[position]
-        holder.binding.itemText.text = item.name
-        val boothId = item.id
-
-        val heartIcon = if (item.isBookmarked) {
-            R.drawable.heart_filled
-        } else {
-            R.drawable.heart_empty
-        }
-
-        holder.binding.heartButton.setImageResource(heartIcon)
-
-        holder.binding.heartButton.setOnClickListener {
-            val dialog = AlertDialog.Builder(holder.itemView.context)
-                .setTitle("북마크 삭제")
-                .setMessage("${item.name}을(를) 북마크에서 삭제하시겠습니까?")
-                .setPositiveButton("예") { _, _ ->
-                    deleteBookmarkFromDatabase(item.id, position, holder.itemView.context)
-                }
-                .setNegativeButton("아니오", null)
-                .create()
-
-            dialog.show()
-        }
-
-        holder.binding.itemText.setOnClickListener {
-            val db = FirebaseFirestore.getInstance()
-            db.collection("booth").document(boothId)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val boothNumber = document.getLong("booth_number")?.toInt()
-
-                        val dialog = AlertDialog.Builder(holder.itemView.context)
-                            .setTitle("이동")
-                            .setMessage("${item.name} (으)로 이동하시겠습니까?")
-                            .setPositiveButton("예") { _, _ ->
-                                val intent = Intent(holder.itemView.context, DetailActivity::class.java)
-                                intent.putExtra("boothNumber", boothNumber)
-                                holder.itemView.context.startActivity(intent)
-                            }
-                            .setNegativeButton("아니오", null)
-                            .create()
-
-                        dialog.show()
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("Firestore", "Error getting document: $e")
-                }
-        }
+        val booth = bookmarkList[position]
+        holder.bind(booth)
     }
 
     override fun getItemCount(): Int {
-        return items.size
+        return bookmarkList.size
     }
 
-    private fun deleteBookmarkFromDatabase(bookmarkId: String, position: Int, context: Context) {
-        val userRef = db.collection("user").document(userId)
-        val bookmarkToDelete = mapOf(
-            "id" to bookmarkId,
-            "name" to items[position].name,
-            "isBookmarked" to true
-
-        )
-
-        userRef.update("bookmark", FieldValue.arrayRemove(bookmarkToDelete))
-            .addOnSuccessListener {
-                Log.d("Bookmark", "Bookmark deleted successfully")
-
-                items.removeAt(position)
-                notifyItemRemoved(position)
-
-                Toast.makeText(context, "북마크가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Log.w("Bookmark", "Error deleting bookmark", e)
-                Toast.makeText(context, "북마크 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+    fun submitList(list: List<Booth>) {
+        bookmarkList = list
+        notifyDataSetChanged()
     }
 
+    // ViewHolder의 binding을 통해 아이콘 상태를 업데이트
+    private fun toggleBookmarkStatus(boothId: String, binding: ItemUserBookmarkBinding) {
+        val user = FirebaseAuthManager.auth.currentUser
+        if (user != null) {
+            val db = FirebaseFirestore.getInstance()
+            val userRef = db.collection("user").document(user.uid)
 
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val bookmarks = document.get("bookmark") as? List<String> ?: emptyList()
+
+                        if (bookmarks.contains(boothId)) {
+                            // 북마크가 되어 있으면 삭제
+                            userRef.update("bookmark", FieldValue.arrayRemove(boothId))
+                                .addOnSuccessListener {
+                                    binding.icBookmark.setImageResource(R.drawable.ic_yellow_flower)
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("MypageBookmarkAdapter", "Failed to remove bookmark: ${e.message}")
+                                }
+                        } else {
+                            // 북마크가 되어 있지 않으면 추가
+                            userRef.update("bookmark", FieldValue.arrayUnion(boothId))
+                                .addOnSuccessListener {
+                                    binding.icBookmark.setImageResource(R.drawable.ic_flower)
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("MypageBookmarkAdapter", "Failed to add bookmark: ${e.message}")
+                                }
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MypageBookmarkAdapter", "Failed to toggle bookmark: ${e.message}")
+                }
+        }
+    }
 }

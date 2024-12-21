@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.auth.FirebaseAuthManager.auth
 import com.example.bloombooth.databinding.ActivityWithdrawalBinding
 import com.google.android.gms.tasks.Task
@@ -20,46 +20,58 @@ class WithdrawalActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.root)
 
-        val user = auth.currentUser
+        val user = FirebaseAuthManager.auth.currentUser
         if (user != null) {
             fetchUserData(user.uid)
         } else {
             binding.username.text = "사용자의 닉네임"
         }
 
+        // 초기 회색
+        binding.checkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
+
         binding.checkBtn.setOnClickListener {
-            binding.checkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
-            binding.withdrawBtn.isEnabled = true
-            binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+            if (binding.withdrawBtn.isEnabled) {
+                // 이미 활성화된 상태라면 비활성화로 변경
+                binding.checkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
+                binding.withdrawBtn.isEnabled = false
+                binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.light_grey)
+            } else {
+                // 비활성화 상태라면 활성화로 변경
+                binding.checkBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+                binding.withdrawBtn.isEnabled = true
+                binding.withdrawBtn.backgroundTintList = ContextCompat.getColorStateList(this, R.color.pink)
+            }
         }
 
-        binding.withdrawlBackBtn.setOnClickListener {
+
+        // 뒤로가기
+        binding.header.btnBack.setOnClickListener {
             finish()
         }
-
+        
+        // 탈퇴하기
         binding.withdrawBtn.setOnClickListener {
             withdrawal()
         }
     }
 
+    // 사용자 데이터 가져오기
     private fun fetchUserData(userId: String) {
         db.collection("user").document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    val nickname = document.getString("hickname") ?: "사용자의 닉네임"
+                    val nickname = document.getString("nickname") ?: "사용자의 닉네임"
                     binding.username.text = nickname
                 } else {
-                    Toast.makeText(this, "사용자 데이터를 찾을 수 없습니다.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "사용자 데이터를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "데이터를 가져오는 데 실패했습니다: ${e.message}",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -1,7 +1,6 @@
 package com.example.bloombooth
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -11,23 +10,21 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.cloudinary.Cloudinary
 import com.cloudinary.utils.ObjectUtils
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityReviewEditBinding
-import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,26 +33,32 @@ import java.util.Date
 import java.util.UUID
 
 class ReviewEditActivity : AppCompatActivity() {
-    val binding: ActivityReviewEditBinding by lazy { ActivityReviewEditBinding.inflate(layoutInflater) }
-    private lateinit var numbersList: List<Int>
-    val db = Firebase.firestore
-    private var imageList = mutableListOf<String>()
-    private var originImageUrls = mutableListOf<String>()
-    var deleteImageUrls = mutableListOf<String>()
-    private lateinit var adapter: ReviewEditImageAdapter
-    private val newImages = mutableListOf<String>()
+    private val binding: ActivityReviewEditBinding by lazy { ActivityReviewEditBinding.inflate(layoutInflater) }
 
+    private val db = Firebase.firestore
+    private var oldImageList = mutableListOf<String>()
+    private var newImageList = mutableListOf<String>()
+    private var deletedImageList = mutableListOf<String>()
+
+    private lateinit var reviewText: String
+    private lateinit var reviewId: String
+    private lateinit var boothId: String
+    private lateinit var boothName: String
+    private lateinit var userId: String
+    private lateinit var userName: String
+    private var reviewRating = 0
+    private var boothCnt = 0
+    private var accsCnt = 0
+    private var accsCondi = 0
+    private var retouching = 0
+    private var reviewDate: String = ""
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val imageUri = result.data?.data
-            if (imageUri != null) {
-                val currentImageCount = adapter.getItemCount() 
-                if (currentImageCount < 3) {
-                    newImages.clear()
-                    newImages.add(imageUri.toString())
-                    adapter.addNewImage(imageUri.toString())
-                    adapter.notifyDataSetChanged()
+            result.data?.data?.let { imageUri ->
+                if (newImageList.size + oldImageList.filter { it.isNotEmpty() }.size < 3) {
+                    newImageList.add(imageUri.toString())
+                    updateImageViews()
                 } else {
                     showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")
                 }
@@ -65,175 +68,141 @@ class ReviewEditActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.root)
 
-        setupRecyclerView()
-        defaultUISetting()
-        boothCntSetting()
-        addClickListeners()
-        setupRadioButtons()
+        userId = intent.getStringExtra("user_id").toString()
+        userName = intent.getStringExtra("user_name").toString()
+        reviewDate = intent.getStringExtra("review_date").toString()
+        reviewText = intent.getStringExtra("review_text").toString()
+        reviewId = intent.getStringExtra("review_id") ?: return showErrorAndFinish("리뷰 ID를 확인할 수 없습니다.")
+        boothId = intent.getStringExtra("booth_id") ?: return showErrorAndFinish("부스 ID를 확인할 수 없습니다.")
+        boothName = intent.getStringExtra("booth_name").toString()
+        reviewRating = intent.getIntExtra("review_rating", 0)
+        boothCnt = intent.getIntExtra("booth_cnt", 0)
+        accsCnt = intent.getIntExtra("accs_cnt", 0)
+        accsCondi = intent.getIntExtra("accs_condi", 0)
+        retouching = intent.getIntExtra("retouching", 0)
+        oldImageList = intent.getStringArrayListExtra("photo_urls")?.toMutableList() ?: mutableListOf()
 
-        val reviewText = intent.getStringExtra("review_text")
-        val reviewRating = intent.getIntExtra("review_rating", 0)
-        val boothId = intent.getStringExtra("booth_id")
-        val boothCnt = intent.getIntExtra("booth_cnt", 0)
-        val accsCnt = intent.getIntExtra("accs_cnt", 0)
-        originImageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
-        val accsCondi = intent.getIntExtra("accs_condi", 0)
-        val retouching = intent.getIntExtra("retouching", 0)
+        binding.boothName.text = boothName
+        binding.reviewText.setText(reviewText)
+        binding.reviewRating.rating = reviewRating.toFloat()
+        binding.boothCnt.setSelection((1..10).indexOf(boothCnt))
 
-        imageList  = originImageUrls
-        boothId?.let {
-            fetchBoothName(it)
+        initializeSelectionUI()
+        initializeImages()
+
+        // boothCnt 드롭다운
+        val boothCntValues = (1..10).toList()
+        val boothCntAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, boothCntValues)
+        boothCntAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.boothCnt.adapter = boothCntAdapter
+
+        // boothCnt 값을 Spinner에서 미리 선택
+        val position = boothCntValues.indexOf(boothCnt)
+        if (position >= 0) {
+            binding.boothCnt.setSelection(position)
         }
 
-        val reviewTextView: TextView = binding.reviewText
-        reviewText?.let {
-            reviewTextView.text = it
+        binding.icBack.setOnClickListener { showCancelDialog() }
+        binding.btnSelectImage.setOnClickListener {
+            if (checkAndRequestPermission()) openGallery()
         }
-
-        fetchBoothCountText(boothCnt)
-
-        val accsCntRadioGroup = binding.accsCntRadioGroup
-        when (accsCnt) {
-            1 -> accsCntRadioGroup.check(R.id.accsCnt1)
-            2 -> accsCntRadioGroup.check(R.id.accsCnt2)
-            3 -> accsCntRadioGroup.check(R.id.accsCnt3)
-            4 -> accsCntRadioGroup.check(R.id.accsCnt4)
-            else -> accsCntRadioGroup.clearCheck()
-        }
-
-        val accsCondiRadioGroup = binding.accsCondiRadioGroup
-        when (accsCondi) {
-            1 -> accsCondiRadioGroup.check(R.id.accsCondi1)
-            2 -> accsCondiRadioGroup.check(R.id.accsCondi2)
-            3 -> accsCondiRadioGroup.check(R.id.accsCondi3)
-            4 -> accsCondiRadioGroup.check(R.id.accsCondi4)
-            else -> accsCondiRadioGroup.clearCheck()
-        }
-
-        val retouchRadioGroup = binding.retouchRadioGroup
-        when (retouching) {
-            1 -> retouchRadioGroup.check(R.id.retouch1)
-            2 -> retouchRadioGroup.check(R.id.retouch2)
-            3 -> retouchRadioGroup.check(R.id.retouch3)
-            4 -> retouchRadioGroup.check(R.id.retouch4)
-            else -> retouchRadioGroup.clearCheck()
-        }
-
-        val reviewRatingBar = binding.ratingBar
-        reviewRatingBar.rating = reviewRating.toFloat()
-    }
-
-    private fun fetchBoothCountText(boothCnt: Int) {
-        if (boothCnt in 1..10) {
-            binding.toggleButton.text = boothCnt.toString()
+        binding.btnUploadReview.setOnClickListener {
+            if (validateRating()) saveReview() else showToast("평점을 입력해 주세요.")
         }
     }
 
-    private fun fetchBoothName(boothId: String) {
-        val boothRef = db.collection("booth").document(boothId)
-        boothRef.get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val boothName = document.getString("booth_name")
-                    boothName?.let {
-                        binding.boothName.text = it
+    private fun initializeSelectionUI() {
+        preselect(listOf(binding.accsCnt1, binding.accsCnt2, binding.accsCnt3, binding.accsCnt4), accsCnt)
+        preselect(listOf(binding.accsCondi1, binding.accsCondi2, binding.accsCondi3, binding.accsCondi4), accsCondi)
+        preselect(listOf(binding.retouching1, binding.retouching2, binding.retouching3, binding.retouching4), retouching)
+
+        addSelectionListener(listOf(binding.accsCnt1, binding.accsCnt2, binding.accsCnt3, binding.accsCnt4)) { accsCnt = it }
+        addSelectionListener(listOf(binding.accsCondi1, binding.accsCondi2, binding.accsCondi3, binding.accsCondi4)) { accsCondi = it }
+        addSelectionListener(listOf(binding.retouching1, binding.retouching2, binding.retouching3, binding.retouching4)) { retouching = it }
+    }
+
+    private fun initializeImages() = updateImageViews()
+
+    private fun updateImageViews() {
+        val allImages = oldImageList.filter { it.isNotEmpty() } + newImageList
+        val imageViews = listOf(binding.pic1, binding.pic2, binding.pic3)
+        val deleteButtons = listOf(binding.deletePic1, binding.deletePic2, binding.deletePic3)
+
+        imageViews.forEachIndexed { index, imageView ->
+            if (index < allImages.size) {
+                Glide.with(this).load(toSecureURL(allImages[index])).into(imageView)
+                imageView.visibility = View.VISIBLE
+                deleteButtons[index].apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        if (index < oldImageList.size) {
+                            deletedImageList.add(oldImageList[index])
+                            oldImageList[index] = ""
+                        } else {
+                            newImageList.removeAt(index - oldImageList.size)
+                        }
+                        updateImageViews()
                     }
                 }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("ReviewActivity", "Error getting document: ", exception)
-            }
-    }
-
-    private fun boothCntSetting() {
-        numbersList = (1..10).toList()
-    }
-
-    private fun addClickListeners() {
-        binding.reviewEditBackBtn.setOnClickListener {
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("리뷰 수정 취소")
-                .setMessage("정말로 취소하시겠습니까? 취소하시면 현재 작성한 내용은 반영되지 않습니다.")
-                .setPositiveButton("네") { _, _ ->
-                    finish()
-                }
-                .setNegativeButton("아니오", null)
-                .create()
-            dialog.show()
-        }
-
-        binding.imageUploadBtn.setOnClickListener {
-            if (checkAndRequestPermission()) {
-                openGallery()
-            }
-        }
-
-        binding.uploadReviewBtn.setOnClickListener {
-            if (validateRating()) {
-                saveReview()
             } else {
-                showToast("평점을 입력해 주세요.")
-            }
-        }
-
-        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                showNumberDialog()
-            } else {
-                binding.numbersRecyclerView.visibility = View.GONE
+                imageView.visibility = View.GONE
+                deleteButtons[index].visibility = View.GONE
             }
         }
     }
+
+    private fun toSecureURL(vulnURL: String) : String {
+        var secureURL: String = vulnURL
+        if (vulnURL.startsWith("http://")) {
+            secureURL = vulnURL.replace("http://", "https://")
+        }
+        return secureURL
+    }
+
+    private fun validateRating() = binding.reviewRating.rating > 0
 
     private fun saveReview() {
-        val userId = FirebaseAuthManager.auth.currentUser?.uid ?: return userNullAction()
-        val boothId = intent.getStringExtra("booth_id") ?: return boothNullAction()
-        val reviewDate = DateFormatter.format(Date())
+        val userId = FirebaseAuthManager.auth.currentUser?.uid
+            ?: return showErrorAndFinish("사용자 인증 정보를 확인할 수 없습니다.")
         val reviewText = binding.reviewText.text.toString()
-        val rating = binding.ratingBar.rating.toInt()
+        val reviewRating = binding.reviewRating.rating.toInt()
 
-        val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") 0 else binding.toggleButton.text.toString().toIntOrNull() ?: 0
-        val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
-        val selectedAccsCondi = getSelectedRadioButtonId(binding.accsCondiRadioGroup)
-        val selectedRetouch = getSelectedRadioButtonId(binding.retouchRadioGroup)
+        // 새 이미지를 Cloudinary에 업로드
+        val imageUrisToUpload = newImageList.filter { it.isNotEmpty() }
+        uploadImagesToCloudinary(imageUrisToUpload) { uploadedImageUrls ->
+            val allImageUrls = oldImageList.filter { it.isNotEmpty() } + uploadedImageUrls
 
-        val userRef = db.collection("user").document(userId)
-        userRef.get().addOnSuccessListener { documentSnapshot ->
-            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
-            val currentImageUrls = intent.getStringArrayListExtra("photo_urls") ?: arrayListOf<String>()
-            val updatedImageUrls = currentImageUrls.toMutableList().apply {
-                removeAll(deleteImageUrls)
-            }
-            updateReviewImages()
-            saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+            val reviewData = hashMapOf(
+                "review_date" to reviewDate,
+                "booth_cnt" to boothCnt,
+                "accs_cnt" to accsCnt,
+                "accs_condi" to accsCondi,
+                "retouching" to retouching,
+                "review_text" to reviewText,
+                "review_rating" to reviewRating,
+                "booth_id" to boothId,
+                "user_id" to userId,
+                "user_name" to userName,
+                "photo_urls" to allImageUrls // Cloudinary URL 포함
+            )
 
-            if (newImages.isNotEmpty()) {
-                uploadNewImages(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
-            } else {
-                saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
-            }
-
-        }.addOnFailureListener { e ->
-            showToast("사용자 정보를 불러오는 데 실패했습니다.")
-            Log.e("REVEIW_EDIT_ERROR", "사용자 정보 불러오기 실패: ${e.localizedMessage}")
+            // Firestore에 저장
+            db.collection("review").document(reviewId).set(reviewData)
+                .addOnSuccessListener {
+                    showToast("리뷰가 성공적으로 업데이트되었습니다.")
+                    startActivity(Intent(this, MyReviewActivity::class.java))
+                }
+                .addOnFailureListener { showToast("리뷰 업데이트에 실패했습니다.") }
         }
     }
 
-    private fun updateReviewImages() {
-        val boothRef = db.collection("review").document(intent.getStringExtra("review_id")!!)
-
-        boothRef.update("photo_urls", FieldValue.arrayRemove(*deleteImageUrls.toTypedArray()))
-            .addOnSuccessListener {
-            }
-            .addOnFailureListener { e ->
-                Log.e("REVEIW_EDIT_ERROR", "이미지 URL 삭제 실패 및 업데이트 오류: ${e.localizedMessage}")
-            }
-    }
-
-    private fun uploadNewImages(updatedImageUrls: MutableList<String>, userName: String, reviewText: String, rating: Int, selectedBoothCount: Int, selectedAccsCnt: Int, selectedAccsCondi: Int, selectedRetouch: Int, boothId: String?, reviewDate: String) {
+    // Cloudinary 업로드
+    private fun uploadImagesToCloudinary(
+        imageUris: List<String>,
+        onComplete: (List<String>) -> Unit
+    ) {
         val cloudinary = Cloudinary(
             ObjectUtils.asMap(
                 "cloud_name", getString(R.string.cloud_name),
@@ -244,9 +213,8 @@ class ReviewEditActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val uploadedUrls = newImages.map { imageUri ->
-                    val uri = Uri.parse(imageUri)
-                    val inputStream = contentResolver.openInputStream(uri)
+                val urls = imageUris.map { imageUri ->
+                    val inputStream = contentResolver.openInputStream(Uri.parse(imageUri))
                     val fileName = "images/${UUID.randomUUID()}.jpg"
 
                     inputStream?.use {
@@ -259,176 +227,61 @@ class ReviewEditActivity : AppCompatActivity() {
                     } ?: throw Exception("Invalid input stream for URI: $imageUri")
                 }
 
-                updatedImageUrls.addAll(uploadedUrls)
                 withContext(Dispatchers.Main) {
-                    saveReviewData(updatedImageUrls, userName, reviewText, rating, selectedBoothCount, selectedAccsCnt, selectedAccsCondi, selectedRetouch, boothId, reviewDate)
+                    onComplete(urls)
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    showToast("이미지 업로드에 실패했습니다. 오류: ${e.message}")
+                    showToast("이미지 업로드 중 오류가 발생했습니다: ${e.message}")
                 }
             }
         }
-    }
-
-    private fun saveReviewData(updatedImageUrls: List<String>, userName: String, reviewText: String, rating: Int, selectedBoothCount: Int, selectedAccsCnt: Int, selectedAccsCondi: Int, selectedRetouch: Int, boothId: String?, reviewDate: String) {
-        val reviewData = hashMapOf(
-            "review_date" to reviewDate,
-            "booth_cnt" to selectedBoothCount,
-            "accs_condi" to selectedAccsCondi,
-            "accs_cnt" to selectedAccsCnt,
-            "retouching" to selectedRetouch,
-            "review_text" to reviewText,
-            "review_rating" to rating,
-            "booth_id" to boothId,
-            "user_id" to FirebaseAuthManager.auth.currentUser?.uid,
-            "user_name" to userName,
-            "photo_urls" to updatedImageUrls
-        )
-
-        val reviewId = intent.getStringExtra("review_id")
-        if (reviewId != null) {
-            db.collection("review").document(reviewId)
-                .set(reviewData)
-                .addOnSuccessListener {
-                    showToast("리뷰가 성공적으로 업데이트되었습니다.")
-                    val intent = Intent(this, MyReviewActivity::class.java)
-                    startActivity(intent)
-                }
-                .addOnFailureListener { e ->
-                    showToast("리뷰 업데이트에 실패했습니다: ${e.localizedMessage}")
-                }
-        } else {
-            showToast("존재하지 않는 리뷰입니다! 다시 시도해주세요.")
-        }
-    }
-
-    private fun validateRating(): Boolean {
-        val rating = binding.ratingBar.rating
-        return rating > 0
-    }
-
-    private fun boothNullAction() {
-        showToast("해당 부스가 존재하지 않습니다.")
-        startActivity(Intent(this, SplashActivity::class.java))
-        finish()
-    }
-
-    private fun userNullAction() {
-        showToast("로그인이 필요합니다.")
-        startActivity(Intent(this, SplashActivity::class.java))
-        finish()
-    }
-
-    private fun getSelectedRadioButtonId(radioGroup: RadioGroup): Int {
-        val selectedRadioButtonId = radioGroup.checkedRadioButtonId
-        val selectedRadioButton = findViewById<RadioButton>(selectedRadioButtonId)
-        val selectedText = selectedRadioButton?.text.toString()
-
-        return when (selectedText) {
-            "없음" -> 1
-            "적음" -> 2
-            "나쁨" -> 2
-            "보통" -> 3
-            "좋음" -> 4
-            "많음" -> 4
-            else -> 0
-        }
-    }
-
-    private fun showNumberDialog() {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("부스 개수 선택")
-            .setItems(numbersList.map { it.toString() }.toTypedArray()) { _, which ->
-                val selectedNumber = numbersList[which]
-                binding.toggleButton.text = selectedNumber.toString()
-            }
-            .setNegativeButton("취소", null)
-            .create()
-
-        dialog.show()
-    }
-
-    private fun defaultUISetting() {
-        binding.imageUploadBtn.backgroundTintList =
-            ContextCompat.getColorStateList(this, R.color.pink)
-        binding.uploadReviewBtn.backgroundTintList =
-            ContextCompat.getColorStateList(this, R.color.pink)
-    }
-
-    private fun setupRecyclerView() {
-        val imageList = ArrayList<String>(intent.getStringArrayListExtra("photo_urls") ?: arrayListOf())
-
-        originImageUrls = imageList
-
-        adapter = ReviewEditImageAdapter(
-            images = originImageUrls,
-            deletedImages = deleteImageUrls
-        )
-        binding.imageThumbnailList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.imageThumbnailList.adapter = adapter
     }
 
     private fun checkAndRequestPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                    PERMISSION_REQUEST_CODE
-                )
-                return false
-            }
-        } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    PERMISSION_REQUEST_CODE
-                )
-                return false
-            }
-        }
-        return true
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
+        return if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), PERMISSION_REQUEST_CODE)
+            false
+        } else true
     }
 
-    private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
-        }
-        imagePickerResult.launch(intent)
+    private fun openGallery() = imagePickerResult.launch(Intent(Intent.ACTION_PICK).apply { type = "image/*" })
+
+    private fun showErrorAndFinish(message: String) {
+        showToast(message)
+        finish()
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun showToast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+    private fun showCancelDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("리뷰 수정 취소")
+            .setMessage("정말로 취소하시겠습니까? 취소하시면 현재 작성한 내용은 반영되지 않습니다.")
+            .setPositiveButton("네") { _, _ -> finish() }
+            .setNegativeButton("아니오", null)
+            .create()
+            .show()
     }
 
-    private fun setupRadioButtons() {
-        val accsCntRadioGroup = binding.accsCntRadioGroup
-        val accsCondiRadioGroup = binding.accsCondiRadioGroup
-        val retouchRadioGroup = binding.retouchRadioGroup
-
-        accsCntRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
-        }
-        accsCondiRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
-        }
-        retouchRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
+    private fun preselect(textViews: List<TextView>, selectedIndex: Int) {
+        textViews.forEachIndexed { index, textView ->
+            textView.setBackgroundResource(if (index == selectedIndex - 1) R.drawable.bg_dark_pink else R.drawable.bg_light_pink)
+            textView.setTextColor(resources.getColor(if (index == selectedIndex - 1) R.color.white else R.color.black, null))
         }
     }
 
-    @SuppressLint("ResourceAsColor")
-    private fun changeRadioButtonColor(group: RadioGroup, checkedId: Int) {
-        val selectedRadioButton = group.findViewById<RadioButton>(checkedId)
-
-        selectedRadioButton.setBackgroundResource(R.drawable.main_button)
-        for (i in 0 until group.childCount) {
-            val button = group.getChildAt(i) as RadioButton
-            if (button != selectedRadioButton) {
-                button.setBackgroundResource(R.drawable.edit_text)
+    private fun addSelectionListener(textViews: List<TextView>, onSelect: (Int) -> Unit) {
+        textViews.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                textViews.forEach {
+                    it.setBackgroundResource(R.drawable.bg_light_pink)
+                    it.setTextColor(resources.getColor(R.color.black, null))
+                }
+                textView.setBackgroundResource(R.drawable.bg_dark_pink)
+                textView.setTextColor(resources.getColor(R.color.white, null))
+                onSelect(index + 1)
             }
         }
     }

@@ -12,4 +12,7 @@ data class Review(
     val review_text: String = "",
     val user_id: String = "",
     val user_name: String = "",
-)
+) {
+    var booth_name: String = ""
+    var review_id: String = ""
+}

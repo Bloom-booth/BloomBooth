@@ -50,12 +50,6 @@ class SearchResultActivity : AppCompatActivity() {
         val accsCondi = intent.getIntExtra("accsCondi", 0)
         val retouching = intent.getIntExtra("retouching", 0)
 
-        Log.d("searchSettingTest", "boothName: $boothName")
-        Log.d("searchSettingTest", "boothCnt: $boothCnt")
-        Log.d("searchSettingTest", "accsCnt: $accsCnt")
-        Log.d("searchSettingTest", "accsCondi: $accsCondi")
-        Log.d("searchSettingTest", "retouching: $retouching")
-
         val db = FirebaseFirestore.getInstance()
         db.collection("booth")
             .get()

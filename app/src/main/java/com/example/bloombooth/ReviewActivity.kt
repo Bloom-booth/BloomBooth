@@ -1,23 +1,20 @@
 package com.example.bloombooth
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityReviewBinding
 import com.google.firebase.Firebase
@@ -27,6 +24,7 @@ import com.cloudinary.Cloudinary
 import kotlinx.coroutines.*
 import com.cloudinary.utils.ObjectUtils
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,105 +32,127 @@ import java.util.UUID
 
 class ReviewActivity : AppCompatActivity() {
     private val binding: ActivityReviewBinding by lazy { ActivityReviewBinding.inflate(layoutInflater) }
+
     private val imageList = mutableListOf<String>()
-    private lateinit var adapter: ImageAdapter
-    private lateinit var numbersList: List<Int>
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val imageUri = result.data?.data
             if (imageUri != null) {
+                // Ensure the image list size is within limits
                 if (imageList.size < 3) {
-                    imageList.add(imageUri.toString())
-                    adapter.notifyItemInserted(imageList.size - 1)
+                    imageList.add(imageUri.toString()) // Add the URI as a string
+                    updateImagePreviews()  // Update UI with the newly selected image
                 } else {
                     showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")
                 }
+            } else {
+                showToast("이미지를 선택할 수 없습니다.")
             }
+        } else {
+            showToast("이미지 선택을 취소했습니다.")
         }
     }
+
+    private val db = FirebaseFirestore.getInstance()
+
+    private var userId: String = ""
+    private var userName: String = ""
+
+    private var boothId: String = ""
+    private var boothName: String = ""
+
+    private var boothCnt = 0
+    private var accsCnt = 0
+    private var accsCondi = 0
+    private var retouching = 0
+    private var reviewDate = DateFormatter.format(Date())
+    private var reviewRating: Int = 0
+    private var reviewText: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        val boothName = intent.getStringExtra("boothName") ?: "업체명"
+
+        // user 정보 받아오기
+        userId = FirebaseAuthManager.auth.currentUser?.uid.toString()
+        db.collection("user").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    userName = document.getString("nickname") ?: "Unknown"
+                }
+            }
+
+        // booth 정보 받아오기
+        boothId = intent.getStringExtra("boothId").toString()
+        boothName = intent.getStringExtra("boothName").toString()
+
+        // 뒤로가기
+        binding.icBack.setOnClickListener{ finish() }
+
+        // boothName 적용하기
         binding.boothName.text = boothName
 
-        setupRecyclerView()
-        defaultUISetting()
-        boothCntSetting()
-        addClickListeners()
-        setupRadioButtons()
-    }
+        // boothCnt 드롭다운
+        val boothCntValues = (1 .. 10).toList()
+        val boothCntAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, boothCntValues)
+        boothCntAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.boothCnt.adapter = boothCntAdapter
 
-    private fun boothCntSetting() {
-        numbersList = (1..10).toList()
-    }
-
-    private fun addClickListeners() {
-        binding.reviewBackBtn.setOnClickListener {
-            val intent = Intent(this, DetailActivity::class.java)
-            startActivity(intent)
+        // accsCnt, accsCondi, retouching 한글에서 숫자로
+        selectedToInt(
+            listOf(binding.accsCnt1, binding.accsCnt2, binding.accsCnt3, binding.accsCnt4)
+        ) { selectedIndex ->
+            accsCnt = selectedIndex
+        }
+        selectedToInt(
+            listOf(binding.accsCondi1, binding.accsCondi2, binding.accsCondi3, binding.accsCondi4)
+        ) { selectedIndex ->
+            accsCondi = selectedIndex
+        }
+        selectedToInt(
+            listOf(binding.retouching1, binding.retouching2, binding.retouching3, binding.retouching4)
+        ) { selectedIndex ->
+            retouching = selectedIndex
         }
 
-        binding.imageUploadBtn.setOnClickListener {
+        // 사진이 선택된다면 나타날 자리
+        binding.pic1.visibility = View.GONE
+        binding.pic2.visibility = View.GONE
+        binding.pic3.visibility = View.GONE
+
+        // 사진 선택하기 버튼
+        binding.btnSelectImage.setOnClickListener {
             if (checkAndRequestPermission()) {
                 openGallery()
             }
         }
 
-        binding.uploadReviewBtn.setOnClickListener {
-            if (validateRating()) {
+        // 리뷰 등록하기 버튼 클릭 리스너
+        binding.btnUploadReview.setOnClickListener {
+            if (!validateRating()) {
+                Toast.makeText(this, "별점을 선택해야 합니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            } else {
                 saveReview()
-            } else {
-                showToast("평점을 입력해 주세요.")
-            }
-        }
-
-        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                showNumberDialog()
-            } else {
-                binding.numbersRecyclerView.visibility = View.GONE
             }
         }
     }
 
     private fun saveReview() {
         val db = Firebase.firestore
-        val selectedBoothCount = if (binding.toggleButton.text.toString() == "선택") {
-            0
-        } else {
-            binding.toggleButton.text.toString().toIntOrNull() ?: 0
-        }
-
-        val selectedAccsCnt = getSelectedRadioButtonId(binding.accsCntRadioGroup)
-        val selectedAccsCondi = getSelectedRadioButtonId(binding.accsCondiRadioGroup)
-        val selectedRetouch = getSelectedRadioButtonId(binding.retouchRadioGroup)
-        val reviewText = binding.reviewText.text.toString()
-        val rating = binding.ratingBar.rating.toInt()
-
-        val userId = FirebaseAuthManager.auth.currentUser?.uid
-        if (userId == null) userNullAction()
-
-        val boothId = intent.getStringExtra("boothId")
-        if (boothId == null) boothNullAction()
-
-        val reviewDate = DateFormatter.format(Date())
-
-        val userRef = db.collection("user").document(userId!!)
-        userRef.get().addOnSuccessListener { documentSnapshot ->
-            val userName = documentSnapshot.getString("nickname") ?: "알수없음"
-
+        val userRef = db.collection("user").document(userId)
+        userRef.get().addOnSuccessListener { _ ->
             uploadImagesToCloudinary(imageList) { urls ->
                 val reviewData = hashMapOf(
                     "review_date" to reviewDate,
-                    "booth_cnt" to selectedBoothCount,
-                    "accs_condi" to selectedAccsCondi,
-                    "accs_cnt" to selectedAccsCnt,
-                    "retouching" to selectedRetouch,
+                    "booth_cnt" to boothCnt,
+                    "accs_condi" to accsCondi,
+                    "accs_cnt" to accsCnt,
+                    "retouching" to retouching,
                     "review_text" to reviewText,
-                    "review_rating" to rating,
+                    "review_rating" to reviewRating,
                     "booth_id" to boothId,
                     "user_id" to userId,
                     "user_name" to userName,
@@ -143,29 +163,51 @@ class ReviewActivity : AppCompatActivity() {
                     .add(reviewData)
                     .addOnSuccessListener { documentReference ->
                         val reviewId = documentReference.id
-
-                        if (userId != null) {
-                            db.collection("user").document(userId)
-                                .update("review_ids", FieldValue.arrayUnion(reviewId))
-                                .addOnSuccessListener {
-                                    showToast("리뷰가 성공적으로 등록되었습니다.")
-                                    finish()
-                                }
-                                .addOnFailureListener { e ->
-                                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-                                }
-                        }
+                        db.collection("user").document(userId)
+                            .update("review_ids", FieldValue.arrayUnion(reviewId))
+                            .addOnSuccessListener {
+                                showToast("리뷰가 성공적으로 등록되었습니다.")
+                                finish()
+                            }
+                            .addOnFailureListener {
+                                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                            }
                     }
-                    .addOnFailureListener { e ->
+                    .addOnFailureListener {
                         showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
                     }
             }
-        }.addOnFailureListener { e ->
+        }.addOnFailureListener {
             showToast("사용자 정보를 불러오는 데 실패했습니다.")
         }
     }
 
+    // 선택된 사진을 UI에 표시
+    private fun updateImagePreviews() {
+        binding.pic1.visibility = View.GONE
+        binding.pic2.visibility = View.GONE
+        binding.pic3.visibility = View.GONE
 
+        imageList.forEachIndexed { index, uriString ->
+            val uri = Uri.parse(uriString)
+            when (index) {
+                0 -> {
+                    binding.pic1.setImageURI(uri)
+                    binding.pic1.visibility = View.VISIBLE
+                }
+                1 -> {
+                    binding.pic2.setImageURI(uri)
+                    binding.pic2.visibility = View.VISIBLE
+                }
+                2 -> {
+                    binding.pic3.setImageURI(uri)
+                    binding.pic3.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    // Cloudinary 업로드
     private fun uploadImagesToCloudinary(
         imageUris: List<String>,
         onComplete: (List<String>) -> Unit
@@ -195,7 +237,7 @@ class ReviewActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    onComplete(urls) 
+                    onComplete(urls)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -206,88 +248,32 @@ class ReviewActivity : AppCompatActivity() {
     }
 
     private fun validateRating(): Boolean {
-        val rating = binding.ratingBar.rating
-        return rating > 0
+        reviewRating = binding.reviewRating.rating.toInt()
+        return reviewRating > 0
     }
 
-    private fun boothNullAction() {
-        showToast("해당 부스가 존재하지 않습니다.")
-        startActivity(Intent(this, SplashActivity::class.java))
-        finish()
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun userNullAction() {
-        showToast("로그인이 필요합니다.")
-        startActivity(Intent(this, SplashActivity::class.java))
-        finish()
-    }
-
-    private fun getSelectedRadioButtonId(radioGroup: RadioGroup): Int {
-        val selectedRadioButtonId = radioGroup.checkedRadioButtonId
-        val selectedRadioButton = findViewById<RadioButton>(selectedRadioButtonId)
-        val selectedText = selectedRadioButton?.text.toString()
-
-        return when (selectedText) {
-            "없음" -> 1
-            "적음" -> 2
-            "나쁨" -> 2
-            "보통" -> 3
-            "좋음" -> 4
-            "많음" -> 4
-            else -> 0 
-        }
-    }
-
-    private fun showNumberDialog() {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("부스 개수 선택")
-            .setItems(numbersList.map { it.toString() }.toTypedArray()) { _, which ->
-                val selectedNumber = numbersList[which]
-                binding.toggleButton.text = selectedNumber.toString()
-            }
-            .setNegativeButton("취소", null)
-            .create()
-
-        dialog.show()
-    }
-
-    private fun defaultUISetting() {
-        binding.imageUploadBtn.backgroundTintList =
-            ContextCompat.getColorStateList(this, R.color.pink)
-        binding.uploadReviewBtn.backgroundTintList =
-            ContextCompat.getColorStateList(this, R.color.pink)
-    }
-
-    private fun setupRecyclerView() {
-        adapter = ImageAdapter(imageList, { position ->
-            imageList.removeAt(position)
-            adapter.notifyItemRemoved(position)
-        }, { _ -> })
-        binding.imageThumbnailList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.imageThumbnailList.adapter = adapter
-    }
-
+    // 이미지 권한 체크
     private fun checkAndRequestPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                    PERMISSION_REQUEST_CODE
-                )
-                return false
-            }
+        val isPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
         } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    PERMISSION_REQUEST_CODE
-                )
-                return false
-            }
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
-        return true
+
+        if (!isPermissionGranted) {
+            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+            ActivityCompat.requestPermissions(this, arrayOf(permission), PERMISSION_REQUEST_CODE)
+        }
+
+        return isPermissionGranted
     }
 
     private fun openGallery() {
@@ -297,35 +283,32 @@ class ReviewActivity : AppCompatActivity() {
         imagePickerResult.launch(intent)
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
+    // 한글에서 숫자로
+    private fun selectedToInt(
+        textViews: List<TextView>,
+        onSelect: (Int) -> Unit
+    ) {
+        var lastSelectedIndex: Int? = null // 마지막으로 선택된 항목 저장
 
-    private fun setupRadioButtons() {
-        val accsCntRadioGroup = binding.accsCntRadioGroup
-        val accsCondiRadioGroup = binding.accsCondiRadioGroup
-        val retouchRadioGroup = binding.retouchRadioGroup
-
-        accsCntRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
-        }
-        accsCondiRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
-        }
-        retouchRadioGroup.setOnCheckedChangeListener { group, checkedId ->
-            changeRadioButtonColor(group, checkedId)
-        }
-    }
-
-    @SuppressLint("ResourceAsColor")
-    private fun changeRadioButtonColor(group: RadioGroup, checkedId: Int) {
-        val selectedRadioButton = group.findViewById<RadioButton>(checkedId)
-
-        selectedRadioButton.setBackgroundResource(R.drawable.main_button)
-        for (i in 0 until group.childCount) {
-            val button = group.getChildAt(i) as RadioButton
-            if (button != selectedRadioButton) {
-                button.setBackgroundResource(R.drawable.edit_text)
+        textViews.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                if (lastSelectedIndex == index) {
+                    // 이미 선택된 것을 다시 클릭한 경우 선택 해제
+                    textViews[index].setBackgroundResource(R.drawable.bg_light_pink) // 기본 배경
+                    textViews[index].setTextColor(resources.getColor(R.color.black, null)) // 기본 텍스트 색
+                    lastSelectedIndex = null // 선택 해제
+                    onSelect(0) // 값 초기화
+                } else {
+                    // 다른 항목 선택
+                    textViews.forEach {
+                        it.setBackgroundResource(R.drawable.bg_light_pink) // 기본 배경
+                        it.setTextColor(resources.getColor(R.color.black, null)) // 기본 텍스트 색
+                    }
+                    textView.setBackgroundResource(R.drawable.bg_dark_pink) // 선택된 배경
+                    textView.setTextColor(resources.getColor(R.color.white, null)) // 선택된 텍스트 색
+                    lastSelectedIndex = index // 현재 선택 항목 업데이트
+                    onSelect(index + 1) // 선택된 값 전달
+                }
             }
         }
     }

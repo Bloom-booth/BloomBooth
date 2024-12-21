@@ -62,32 +62,25 @@ class DetailActivity : AppCompatActivity() {
 
     private fun findBooth() {
         val db = FirebaseFirestore.getInstance()
-        db.collection("booth")
-            .whereEqualTo("booth_number", boothNumber)
+        db.collection("booth").document(boothId)
             .get()
-            .addOnSuccessListener { documents ->
-                if (documents.size() == 1) {
-                    val document = documents.first()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
                     val booth = document.toObject(Booth::class.java)
                     val boothId = document.id
                     findReview(boothId)
 
-                    binding.boothName.text = booth.booth_name
-
-                    binding.boothAddr.text = booth.booth_addr
-                    binding.boothInfo.text = booth.booth_info
-                    binding.boothContact.text = booth.booth_contact
-
-                    binding.boothCnt.text = booth.booth_cnt.toString()
-                    binding.accsCondi.text = goodOrBad(booth.accs_condi)
-                    binding.accsCnt.text = lessOrLot(booth.accs_cnt)
-                    binding.retouching.text = goodOrBad(booth.retouching)
-
-                    binding.reviewAvg.text = booth.review_avg.toString()
-
-                    Log.d("DetailActivityTest", "Booth found: ${booth.booth_name}")
-                } else if (documents.size() > 1) {
-                    Log.e("DetailActivityTest", "Booth multiple matches")
+                    if (booth != null) {
+                        binding.boothName.text = booth.booth_name
+                        binding.boothAddr.text = booth.booth_addr
+                        binding.boothInfo.text = booth.booth_info
+                        binding.boothContact.text = booth.booth_contact
+                        binding.boothCnt.text = booth.booth_cnt.toString()
+                        binding.accsCondi.text = goodOrBad(booth.accs_condi)
+                        binding.accsCnt.text = lessOrLot(booth.accs_cnt)
+                        binding.retouching.text = goodOrBad(booth.retouching)
+                        binding.reviewAvg.text = booth.review_avg.toString()
+                    }
                 } else {
                     Log.e("DetailActivityTest", "Booth Not Found")
                 }
@@ -106,7 +99,10 @@ class DetailActivity : AppCompatActivity() {
                 if (!documents.isEmpty) {
                     for (document in documents) {
                         val review = document.toObject(Review::class.java)
-                        reviewList.add(review)
+                        // 중복된 리뷰가 없는지 확인하고 추가
+                        if (!reviewList.contains(review)) {
+                            reviewList.add(review)
+                        }
                     }
                     sortDate()
                     updateUI(reviewList)
@@ -219,5 +215,11 @@ class DetailActivity : AppCompatActivity() {
                     Log.e("DetailActivity", "Failed to toggle bookmark: ${e.message}")
                 }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkBookmarkStatus()  // 북마크 상태 새로 고침
+        findBooth()  // 부스 정보 새로 고침
     }
 }
