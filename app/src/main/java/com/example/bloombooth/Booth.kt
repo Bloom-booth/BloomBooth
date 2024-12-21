@@ -13,8 +13,8 @@ data class Booth(
     val booth_pic: String = "",
     val booth_loc: GeoPoint? = null,
     val retouching: Int = 0,
-    val review_avg: Int = 0,
-    val review_cnt: Int = 0
+    var review_avg: Int = 0,
+    var review_cnt: Int = 0
 ){
     fun getLocation(): Location? {
         return booth_loc?.let {

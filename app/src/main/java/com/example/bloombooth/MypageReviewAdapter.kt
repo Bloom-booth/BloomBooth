@@ -1,7 +1,9 @@
 package com.example.bloombooth
 
+import Booth
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ItemMypageReviewBinding
+import com.google.android.libraries.places.api.model.kotlin.review
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-class MypageReviewAdapter(private val context: Context, val reviewList: MutableList<Review>) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
+class MypageReviewAdapter(
+    private val context: Context,
+    val reviewList: MutableList<Review>
+) : RecyclerView.Adapter<MypageReviewAdapter.ReviewViewHolder>() {
     private val db = FirebaseFirestore.getInstance()
 
     inner class ReviewViewHolder(private val binding: ItemMypageReviewBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -128,6 +134,7 @@ class MypageReviewAdapter(private val context: Context, val reviewList: MutableL
                     val userRef = db.collection("user").document(userId)
                     userRef.update("review_ids", FieldValue.arrayRemove(reviewId))
                         .addOnSuccessListener {
+                            updateBoothReviewDelete(review)
                             reviewList.remove(review)
                             notifyDataSetChanged()
 
@@ -141,6 +148,56 @@ class MypageReviewAdapter(private val context: Context, val reviewList: MutableL
                     Toast.makeText(context, "리뷰 삭제에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
+    }
+
+    private fun updateBoothReviewDelete(review: Review) {
+        db.collection("booth").document(review.booth_id)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Firestore에서 Booth 객체를 가져오기
+                    var updateBooth = document.toObject(Booth::class.java)
+
+                    // updateBooth가 null인 경우 처리
+                    if (updateBooth != null) {
+                        // 기존 리뷰 점수와 카운트 값
+                        val oldRating = updateBooth.review_avg ?: 0
+                        val newRating = review.review_rating // 삭제된 리뷰의 점수
+                        val oldReviewCnt = updateBooth.review_cnt ?: 0
+
+                        // 새로운 review_avg와 review_cnt 계산
+                        if (oldReviewCnt > 1) {
+                            updateBooth.review_avg = ((oldRating * oldReviewCnt - newRating) / (oldReviewCnt - 1))
+                            updateBooth.review_cnt = oldReviewCnt - 1
+                        } else {
+                            // 리뷰가 1개일 경우 삭제되면 0으로 설정
+                            updateBooth.review_avg = 0
+                            updateBooth.review_cnt = 0
+                        }
+
+
+                        // Firestore에서 review_avg와 review_cnt만 업데이트
+                        db.collection("booth").document(review.booth_id)
+                            .update(
+                                "review_avg", updateBooth.review_avg,
+                                "review_cnt", updateBooth.review_cnt
+                            )
+                            .addOnSuccessListener {
+                                Log.d("Update Success", "Booth review updated successfully")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore Error", "Error updating booth review: ${exception.message}")
+                            }
+                    } else {
+                        Log.e("Firestore Error", "Booth document not found")
+                    }
+                } else {
+                    Log.e("Firestore Error", "Document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore Error", "Error retrieving document: ${exception.message}")
+            }
     }
 
     private fun goodOrBad(value: Int): String {

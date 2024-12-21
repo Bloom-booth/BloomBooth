@@ -51,7 +51,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="이메일을 입력해주세요."
@@ -72,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:maxLines="1"
-            android:textSize="13sp"
+            android:textSize="13dp"
             android:hint="로그인에 사용할 이메일을 입력해주세요."
             android:layout_marginTop="10dp" />
 
@@ -88,7 +88,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="비밀번호를 입력해주세요."/>
@@ -99,7 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:inputType="textPassword"
-            android:textSize="13sp"
+            android:textSize="13dp"
             android:hint="영문, 숫자, 특수문자 포함 6자 ~ 12자여야 합니다."/>
 
         <TextView
@@ -112,7 +112,7 @@
 
         <TextView
             android:layout_marginTop="15dp"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="비밀번호를 다시 한 번 입력해주세요."/>
@@ -123,7 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:inputType="textPassword"
-            android:textSize="13sp"
+            android:textSize="13dp"
             android:hint="입력한 비밀번호를 다시 한 번 입력해주세요!"/>
 
         <TextView
@@ -147,7 +147,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="닉네임을 입력해주세요."/>
@@ -157,14 +157,14 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:maxLines="1"
-            android:textSize="13sp"
+            android:textSize="13dp"
             android:hint="한글 및 영문을 사용하며, 2자 ~ 12자여아 합니다."/>
 
         <TextView
             android:id="@+id/nickname_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
+            android:textSize="13dp"
             android:text="닉네임은 한글과 영문을 포함할 수 있으며 2자 ~ 12자여야 합니다."
             android:textColor="@color/red"
             android:visibility="gone" />

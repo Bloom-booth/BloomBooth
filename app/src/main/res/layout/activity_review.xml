@@ -44,7 +44,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:text="Booth Name"
-                android:textSize="24sp"/>
+                android:textSize="24dp"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--reviewRating-->
@@ -54,7 +54,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:text="부스 별점" />
         <RatingBar
             android:id="@+id/review_rating"
@@ -71,13 +71,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:text="후기를 작성해주세요." />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:textSize="14sp"
+            android:textSize="14dp"
             android:text="근거 없는 비난과 욕설은 무통보 삭제될 수 있습니다." />
         <EditText
             android:id="@+id/review_text"
@@ -101,7 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="부스 개수"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -124,7 +124,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:text="악세서리 개수" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -138,7 +138,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="없음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -149,7 +149,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="적음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -160,7 +160,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="보통"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -170,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="많음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -182,7 +182,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:text="악세서리 상태" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -196,7 +196,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="없음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -207,7 +207,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="나쁨"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -218,7 +218,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="보통"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -228,7 +228,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="좋음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -240,7 +240,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:textStyle="bold"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:text="보정" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -254,7 +254,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="없음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -265,7 +265,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="나쁨"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -276,7 +276,7 @@
                 android:padding="8dp"
                 android:layout_marginRight="10dp"
                 android:text="보통"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -286,7 +286,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="좋음"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/bg_light_pink" />
@@ -310,13 +310,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:textSize="20dp"
                     android:text="사진을 등록해주세요." />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:textSize="14sp"
+                    android:textSize="14dp"
                     android:text="사진은 최대 3장까지 등록할 수 있습니다." />
             </LinearLayout>
             <TextView
@@ -328,7 +328,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:padding="8dp"
                 android:text="첨부하기"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:textColor="@color/white"
                 android:gravity="center"
                 android:background="@drawable/bg_dark_pink" />
@@ -340,31 +340,70 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
-            <ImageView
-                android:id="@+id/pic1"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+            <LinearLayout
+                android:id="@+id/layout_pic1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:src="@drawable/ic_flower" />
-            <ImageView
-                android:id="@+id/pic2"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:orientation="vertical" >
+                <ImageView
+                    android:id="@+id/pic1"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/ic_flower" />
+                <ImageView
+                    android:id="@+id/delete_pic1"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_delete" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_pic2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:src="@drawable/ic_flower" />
-            <ImageView
-                android:id="@+id/pic3"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:orientation="vertical" >
+                <ImageView
+                    android:id="@+id/pic2"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/ic_flower" />
+                <ImageView
+                    android:id="@+id/delete_pic2"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_delete" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_pic3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:src="@drawable/ic_flower" />
+                android:orientation="vertical" >
+                <ImageView
+                    android:id="@+id/pic3"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/ic_flower" />
+                <ImageView
+                    android:id="@+id/delete_pic3"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_delete" />
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--btnUploadReview-->
@@ -377,7 +416,7 @@
             android:background="@drawable/bg_dark_pink"
             android:gravity="center"
             android:text="리뷰 등록하기"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:textStyle="bold"
             android:textColor="@color/white"/>
     </LinearLayout>

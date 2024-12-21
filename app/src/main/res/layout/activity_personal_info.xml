@@ -1,123 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="30dp"
-    android:background="@color/white" >
-
-    <!--btn_back-->
-    <include
-        android:id="@+id/header"
-        layout="@layout/header_back"
+    android:background="@color/white"
+    android:fillViewport="true">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:background="@color/white" >
 
-    <!--username-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="안녕하세요!"
-        android:textSize="24sp" />
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="청파동춘식이"
-            android:textSize="30sp"/>
+        <!--btn_back-->
+        <include
+            android:id="@+id/header"
+            layout="@layout/header_back"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!--username-->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" 님"
-            android:textSize="30sp"/>
+            android:layout_marginTop="30dp"
+            android:text="안녕하세요!"
+            android:textSize="24dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="청파동춘식이"
+                android:textSize="30dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 님"
+                android:textSize="30dp"/>
+        </LinearLayout>
+
+        <!--email-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="이메일 (수정 불가)"
+            android:textSize="20dp"/>
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_light_gray"
+            android:text="example@gmail.com"
+            android:textColor="@color/black"
+            android:textSize="18dp" />
+
+        <!--old_pw, new_pw, new_pw_check-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="비밀번호"
+            android:textSize="20dp"/>
+        <EditText
+            android:id="@+id/old_pw"
+            android:padding="12dp"
+            android:inputType="textPassword"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_light_pink"
+            android:textSize="18dp"
+            android:hint="기존 비밀번호를 입력해주세요."/>
+        <EditText
+            android:id="@+id/new_pw"
+            android:padding="12dp"
+            android:layout_marginTop="10dp"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_light_pink"
+            android:textSize="18dp"
+            android:hint="새로운 비밀번호를 입력해주세요."/>
+        <EditText
+            android:id="@+id/new_pw_check"
+            android:padding="12dp"
+            android:layout_marginTop="10dp"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_light_pink"
+            android:textSize="18dp"
+            android:hint="새로운 비밀번호를 다시 한 번 입력해주세요."/>
+
+        <!--nickname-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="닉네임"
+            android:textSize="20dp"/>
+        <EditText
+            android:id="@+id/nickname"
+            android:padding="12dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_text"
+            android:textSize="18dp"
+            android:hint="변경할 닉네임을 입력해주세요."/>
+
+        <!--update_userinfo_btn-->
+        <Button
+            android:enabled="false"
+            android:id="@+id/update_userinfo_btn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/main_button"
+            android:text="개인정보 수정하기"
+            android:textSize="20dp"
+            android:textStyle="bold" />
     </LinearLayout>
-
-    <!--email-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="이메일 (수정 불가)"
-        android:textSize="20sp"/>
-    <TextView
-        android:id="@+id/email"
-        android:layout_width="350dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:padding="12dp"
-        android:background="@drawable/bg_light_gray"
-        android:text="example@gmail.com"
-        android:textColor="@color/black"
-        android:textSize="18sp" />
-
-    <!--old_pw, new_pw, new_pw_check-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="비밀번호"
-        android:textSize="20sp"/>
-    <EditText
-        android:id="@+id/old_pw"
-        android:padding="12dp"
-        android:inputType="textPassword"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_light_pink"
-        android:textSize="18sp"
-        android:hint="기존 비밀번호를 입력해주세요."/>
-    <EditText
-        android:id="@+id/new_pw"
-        android:padding="12dp"
-        android:layout_marginTop="10dp"
-        android:inputType="textPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_light_pink"
-        android:textSize="18sp"
-        android:hint="새로운 비밀번호를 입력해주세요."/>
-    <EditText
-        android:id="@+id/new_pw_check"
-        android:padding="12dp"
-        android:layout_marginTop="10dp"
-        android:inputType="textPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_light_pink"
-        android:textSize="18sp"
-        android:hint="새로운 비밀번호를 다시 한 번 입력해주세요."/>
-
-    <!--nickname-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="닉네임"
-        android:textSize="20sp"/>
-    <EditText
-        android:id="@+id/nickname"
-        android:padding="12dp"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/edit_text"
-        android:textSize="18sp"
-        android:hint="변경할 닉네임을 입력해주세요."/>
-
-    <!--update_userinfo_btn-->
-    <Button
-        android:enabled="false"
-        android:id="@+id/update_userinfo_btn"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="30dp"
-        android:background="@drawable/main_button"
-        android:text="개인정보 수정하기"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-</LinearLayout>
+</ScrollView>

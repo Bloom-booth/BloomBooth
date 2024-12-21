@@ -1,5 +1,6 @@
 package com.example.bloombooth
 
+import Booth
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.TextView
@@ -151,7 +153,7 @@ class ReviewActivity : AppCompatActivity() {
                     "accs_condi" to accsCondi,
                     "accs_cnt" to accsCnt,
                     "retouching" to retouching,
-                    "review_text" to reviewText,
+                    "review_text" to binding.reviewText.text.toString(),
                     "review_rating" to reviewRating,
                     "booth_id" to boothId,
                     "user_id" to userId,
@@ -167,6 +169,7 @@ class ReviewActivity : AppCompatActivity() {
                             .update("review_ids", FieldValue.arrayUnion(reviewId))
                             .addOnSuccessListener {
                                 showToast("리뷰가 성공적으로 등록되었습니다.")
+                                updateBoothReview()
                                 finish()
                             }
                             .addOnFailureListener {
@@ -316,4 +319,48 @@ class ReviewActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
     }
+
+    private fun updateBoothReview() {
+        db.collection("booth").document(boothId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Firestore에서 Booth 객체를 가져오기
+                    var updateBooth = document.toObject(Booth::class.java)
+
+                    // updateBooth가 null인 경우 처리
+                    if (updateBooth != null) {
+                        // 기존 리뷰 점수와 카운트 값
+                        val oldRating = updateBooth.review_avg ?: 0
+                        val newRating = reviewRating
+                        val oldReviewCnt = updateBooth.review_cnt ?: 0
+
+                        // 새로운 review_avg와 review_cnt 계산
+                        updateBooth.review_avg = ((oldRating * oldReviewCnt + newRating) / (oldReviewCnt + 1))
+                        updateBooth.review_cnt = oldReviewCnt + 1
+
+                        // Firestore에서 review_avg와 review_cnt만 업데이트
+                        db.collection("booth").document(boothId)
+                            .update(
+                                "review_avg", updateBooth.review_avg,
+                                "review_cnt", updateBooth.review_cnt
+                            )
+                            .addOnSuccessListener {
+                                Log.d("Update Success", "Booth review updated successfully")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore Error", "Error updating booth review: ${exception.message}")
+                            }
+                    } else {
+                        Log.e("Firestore Error", "Booth document not found")
+                    }
+                } else {
+                    Log.e("Firestore Error", "Document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore Error", "Error retrieving document: ${exception.message}")
+            }
+    }
+
 }

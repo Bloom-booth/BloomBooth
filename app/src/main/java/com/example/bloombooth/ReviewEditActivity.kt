@@ -1,5 +1,6 @@
 package com.example.bloombooth
 
+import Booth
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
@@ -191,6 +192,7 @@ class ReviewEditActivity : AppCompatActivity() {
             // Firestore에 저장
             db.collection("review").document(reviewId).set(reviewData)
                 .addOnSuccessListener {
+                    updateBoothReview()
                     showToast("리뷰가 성공적으로 업데이트되었습니다.")
                     startActivity(Intent(this, MyReviewActivity::class.java))
                 }
@@ -288,5 +290,50 @@ class ReviewEditActivity : AppCompatActivity() {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
+    }
+
+    private fun updateBoothReview() {
+        db.collection("booth").document(boothId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Firestore에서 Booth 객체를 가져오기
+                    var updateBooth = document.toObject(Booth::class.java)
+
+                    // updateBooth가 null인 경우 처리
+                    if (updateBooth != null) {
+                        // 기존 리뷰 점수와 카운트 값
+                        val oldRating = updateBooth.review_avg ?: 0
+                        val newRating = reviewRating // 수정된 리뷰의 새로운 점수
+                        val oldReviewCnt = updateBooth.review_cnt ?: 0
+
+                        // 새로운 review_avg 계산 (기존 점수에서 이전 리뷰 점수를 빼고 새로운 점수로 바꿈)
+                        updateBooth.review_avg = ((oldRating * oldReviewCnt - oldRating + newRating) / oldReviewCnt)
+
+                        // review_cnt는 수정되지 않음
+                        updateBooth.review_cnt = oldReviewCnt
+
+                        // Firestore에서 review_avg와 review_cnt만 업데이트
+                        db.collection("booth").document(boothId)
+                            .update(
+                                "review_avg", updateBooth.review_avg,
+                                "review_cnt", updateBooth.review_cnt
+                            )
+                            .addOnSuccessListener {
+                                Log.d("Update Success", "Booth review updated successfully")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore Error", "Error updating booth review: ${exception.message}")
+                            }
+                    } else {
+                        Log.e("Firestore Error", "Booth document not found")
+                    }
+                } else {
+                    Log.e("Firestore Error", "Document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore Error", "Error retrieving document: ${exception.message}")
+            }
     }
 }

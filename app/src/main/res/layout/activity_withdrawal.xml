@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="안녕하세요!"
-        android:textSize="24sp" />
+        android:textSize="24dp" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -28,12 +28,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="청파동춘식이"
-            android:textSize="30sp"/>
+            android:textSize="30dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" 님"
-            android:textSize="30sp"/>
+            android:textSize="30dp"/>
     </LinearLayout>
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_marginTop="150dp"
         android:gravity="center"
         android:text="정말 탈퇴하시겠습니까?\n\n탈퇴 시 계정 복구는 불가능합니다.\n\n업로드한 리뷰는 삭제되지 않습니다."
-        android:textSize="20sp" />
+        android:textSize="20dp" />
 
     <LinearLayout
         android:layout_marginTop="150dp"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="위의 사항을 모두 확인하였습니다."
-            android:textSize="20sp" />
+            android:textSize="20dp" />
     </LinearLayout>
 
     <Button
@@ -72,7 +72,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:text="탈퇴하기"
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:textColor="@color/white"
         android:background="@drawable/main_button"/>
