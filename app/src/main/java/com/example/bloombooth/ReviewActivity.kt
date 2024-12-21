@@ -17,42 +17,35 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.example.bloombooth.auth.FirebaseAuthManager
 import com.example.bloombooth.databinding.ActivityReviewBinding
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import java.util.Date
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.cloudinary.Cloudinary
 import kotlinx.coroutines.*
 import com.cloudinary.utils.ObjectUtils
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.UUID
 
 class ReviewActivity : AppCompatActivity() {
     private val binding: ActivityReviewBinding by lazy { ActivityReviewBinding.inflate(layoutInflater) }
 
     private val imageList = mutableListOf<String>()
+    private var oldImageList = mutableListOf<String>()
+    private var newImageList = mutableListOf<String>()
+    private var deletedImageList = mutableListOf<String>()
 
     private val imagePickerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val imageUri = result.data?.data
-            if (imageUri != null) {
-                // Ensure the image list size is within limits
-                if (imageList.size < 3) {
-                    imageList.add(imageUri.toString()) // Add the URI as a string
-                    updateImagePreviews()  // Update UI with the newly selected image
+            result.data?.data?.let { imageUri ->
+                if (newImageList.size + oldImageList.filter { it.isNotEmpty() }.size < 3) {
+                    newImageList.add(imageUri.toString())
+                    updateImageViews()
                 } else {
                     showToast("이미지는 최대 3개까지 업로드할 수 있습니다.")
                 }
-            } else {
-                showToast("이미지를 선택할 수 없습니다.")
             }
-        } else {
-            showToast("이미지 선택을 취소했습니다.")
         }
     }
 
@@ -105,24 +98,23 @@ class ReviewActivity : AppCompatActivity() {
         // accsCnt, accsCondi, retouching 한글에서 숫자로
         selectedToInt(
             listOf(binding.accsCnt1, binding.accsCnt2, binding.accsCnt3, binding.accsCnt4)
-        ) { selectedIndex ->
-            accsCnt = selectedIndex
-        }
+        ) { selectedIndex -> accsCnt = selectedIndex }
+
         selectedToInt(
             listOf(binding.accsCondi1, binding.accsCondi2, binding.accsCondi3, binding.accsCondi4)
-        ) { selectedIndex ->
-            accsCondi = selectedIndex
-        }
+        ) { selectedIndex -> accsCondi = selectedIndex }
+
         selectedToInt(
             listOf(binding.retouching1, binding.retouching2, binding.retouching3, binding.retouching4)
-        ) { selectedIndex ->
-            retouching = selectedIndex
-        }
+        ) { selectedIndex -> retouching = selectedIndex }
 
         // 사진이 선택된다면 나타날 자리
         binding.pic1.visibility = View.GONE
         binding.pic2.visibility = View.GONE
         binding.pic3.visibility = View.GONE
+        binding.deletePic1.visibility = View.GONE
+        binding.deletePic2.visibility = View.GONE
+        binding.deletePic3.visibility = View.GONE
 
         // 사진 선택하기 버튼
         binding.btnSelectImage.setOnClickListener {
@@ -143,49 +135,124 @@ class ReviewActivity : AppCompatActivity() {
     }
 
     private fun saveReview() {
-        val db = Firebase.firestore
-        val userRef = db.collection("user").document(userId)
-        userRef.get().addOnSuccessListener { _ ->
-            uploadImagesToCloudinary(imageList) { urls ->
-                val reviewData = hashMapOf(
-                    "review_date" to reviewDate,
-                    "booth_cnt" to boothCnt,
-                    "accs_condi" to accsCondi,
-                    "accs_cnt" to accsCnt,
-                    "retouching" to retouching,
-                    "review_text" to binding.reviewText.text.toString(),
-                    "review_rating" to reviewRating,
-                    "booth_id" to boothId,
-                    "user_id" to userId,
-                    "user_name" to userName,
-                    "photo_urls" to urls
-                )
+        val reviewText = binding.reviewText.text.toString()
+        val reviewRating = binding.reviewRating.rating.toInt()
 
-                db.collection("review")
-                    .add(reviewData)
-                    .addOnSuccessListener { documentReference ->
-                        val reviewId = documentReference.id
-                        db.collection("user").document(userId)
-                            .update("review_ids", FieldValue.arrayUnion(reviewId))
-                            .addOnSuccessListener {
-                                showToast("리뷰가 성공적으로 등록되었습니다.")
-                                updateBoothReview()
-                                finish()
-                            }
-                            .addOnFailureListener {
-                                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
-                            }
+        // 새 이미지를 Cloudinary에 업로드
+        val imageUrisToUpload = newImageList.filter { it.isNotEmpty() }
+        uploadImagesToCloudinary(imageUrisToUpload) { uploadedImageUrls ->
+            val allImageUrls = oldImageList.filter { it.isNotEmpty() } + uploadedImageUrls
+
+            val reviewData = hashMapOf(
+                "review_date" to reviewDate,
+                "booth_cnt" to boothCnt,
+                "accs_cnt" to accsCnt,
+                "accs_condi" to accsCondi,
+                "retouching" to retouching,
+                "review_text" to reviewText,
+                "review_rating" to reviewRating,
+                "booth_id" to boothId,
+                "user_id" to userId,
+                "user_name" to userName,
+                "photo_urls" to allImageUrls // Cloudinary URL 포함
+            )
+
+            db.collection("review")
+                .add(reviewData)
+                .addOnSuccessListener { documentReference ->
+                    val reviewId = documentReference.id
+                    db.collection("user").document(userId)
+                        .update("review_ids", FieldValue.arrayUnion(reviewId))
+                        .addOnSuccessListener {
+                            showToast("리뷰가 성공적으로 등록되었습니다.")
+                            updateBoothReview()
+                            finish()
+                        }
+                        .addOnFailureListener {
+                            showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                        }
+                }
+                .addOnFailureListener {
+                    showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+                }
+        }
+    }
+
+    private fun saveReviewData(urls: List<String>) {
+        val reviewData = hashMapOf(
+            "review_date" to reviewDate,
+            "booth_cnt" to boothCnt,
+            "accs_condi" to accsCondi,
+            "accs_cnt" to accsCnt,
+            "retouching" to retouching,
+            "review_text" to binding.reviewText.text.toString(),
+            "review_rating" to reviewRating,
+            "booth_id" to boothId,
+            "user_id" to userId,
+            "user_name" to userName,
+            "photo_urls" to urls
+        )
+
+        db.collection("review")
+            .add(reviewData)
+            .addOnSuccessListener { documentReference ->
+                val reviewId = documentReference.id
+                db.collection("user").document(userId)
+                    .update("review_ids", FieldValue.arrayUnion(reviewId))
+                    .addOnSuccessListener {
+                        showToast("리뷰가 성공적으로 등록되었습니다.")
+                        updateBoothReview()
+                        finish()
                     }
                     .addOnFailureListener {
                         showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
                     }
             }
-        }.addOnFailureListener {
-            showToast("사용자 정보를 불러오는 데 실패했습니다.")
+            .addOnFailureListener {
+                showToast("리뷰 등록에 실패했습니다. 다시 시도해주세요.")
+            }
+    }
+
+    private fun initializeImages() = updateImageViews()
+
+    private fun updateImageViews() {
+        val allImages = oldImageList.filter { it.isNotEmpty() } + newImageList
+        val imageViews = listOf(binding.pic1, binding.pic2, binding.pic3)
+        val deleteButtons = listOf(binding.deletePic1, binding.deletePic2, binding.deletePic3)
+
+        imageViews.forEachIndexed { index, imageView ->
+            if (index < allImages.size) {
+                Glide.with(this).load(toSecureURL(allImages[index])).into(imageView)
+                imageView.visibility = View.VISIBLE
+                deleteButtons[index].apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        // If it's an old image, add it to deleted list and clear it
+                        if (index < oldImageList.size) {
+                            deletedImageList.add(oldImageList[index])
+                            oldImageList[index] = ""
+                        } else {
+                            // If it's a new image, just remove it
+                            newImageList.removeAt(index - oldImageList.size)
+                        }
+                        updateImageViews()
+                    }
+                }
+            } else {
+                imageView.visibility = View.GONE
+                deleteButtons[index].visibility = View.GONE
+            }
         }
     }
 
-    // 선택된 사진을 UI에 표시
+    private fun toSecureURL(vulnURL: String): String {
+        var secureURL: String = vulnURL
+        if (vulnURL.startsWith("http://")) {
+            secureURL = vulnURL.replace("http://", "https://")
+        }
+        return secureURL
+    }
+
     private fun updateImagePreviews() {
         binding.pic1.visibility = View.GONE
         binding.pic2.visibility = View.GONE
@@ -234,25 +301,20 @@ class ReviewActivity : AppCompatActivity() {
                             "public_id", fileName,
                             "folder", "bloombooth"
                         )
-                        val result = cloudinary.uploader().upload(it, options)
-                        result["url"].toString()
-                    } ?: throw Exception("Invalid input stream for URI: $imageUri")
+                        val uploadResult = cloudinary.uploader().upload(it, options)
+                        uploadResult["secure_url"] as? String ?: ""
+                    } ?: ""
                 }
-
                 withContext(Dispatchers.Main) {
                     onComplete(urls)
                 }
             } catch (e: Exception) {
+                Log.e("Cloudinary", "Image upload failed", e)
                 withContext(Dispatchers.Main) {
-                    showToast("이미지 업로드 중 오류가 발생했습니다: ${e.message}")
+                    showToast("이미지 업로드 실패")
                 }
             }
         }
-    }
-
-    private fun validateRating(): Boolean {
-        reviewRating = binding.reviewRating.rating.toInt()
-        return reviewRating > 0
     }
 
     private fun showToast(message: String) {
@@ -316,6 +378,11 @@ class ReviewActivity : AppCompatActivity() {
         }
     }
 
+    private fun validateRating(): Boolean {
+        reviewRating = binding.reviewRating.rating.toInt()
+        return reviewRating > 0
+    }
+
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
     }
@@ -362,5 +429,4 @@ class ReviewActivity : AppCompatActivity() {
                 Log.e("Firestore Error", "Error retrieving document: ${exception.message}")
             }
     }
-
 }
